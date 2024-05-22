@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "323761786783",
+    "project_id": "birds-477e7",
+    "storage_bucket": "birds-477e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323761786783:android:8d26dcf741d666d8c9f7aa",
+        "android_client_info": {
+          "package_name": "com.example.wingspot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGhh3JM8Ed79MxdUtSkYGcN9-3NS1yfbs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
