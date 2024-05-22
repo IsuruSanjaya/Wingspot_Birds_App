@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       Fluttertoast.showToast(
-        msg: "An error occurred: $e",
+        msg: "An error occurred.Retry again",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
