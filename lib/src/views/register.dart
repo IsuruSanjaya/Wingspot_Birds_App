@@ -219,8 +219,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
           if (_isLoading) // Show loader if isLoading is true
-            Center(
-              child: CircularProgressIndicator(),
+            Container(
+              color: Colors.white.withOpacity(0.5),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
             ),
         ],
       ),
