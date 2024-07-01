@@ -36,7 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
         fontSize: 16.0,
       );
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()), // Replace with your home screen
+        MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen()), // Replace with your home screen
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -97,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/loginu.png'), // Path to your background image
+                image: AssetImage(
+                    'assets/images/Login3.png'), // Path to your background image
                 fit: BoxFit.cover,
               ),
             ),
@@ -105,10 +108,11 @@ class _LoginScreenState extends State<LoginScreen> {
           // Login form
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(30.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SizedBox(height: 250),
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -130,14 +134,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: true,
                   ),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _login,
-                    child: Text('Login'),
+                  SizedBox(
+                    width: double.infinity, // Full width
+                    height: 50, // Set the height as desired
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        primary: Color.fromARGB(
+                            255, 2, 163, 69), // Set the background color
+                      ),
+                      child: Text('Login'),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
+          )
         ],
       ),
     );
