@@ -43,6 +43,8 @@ dependencies:
   cloud_firestore: ^4.14.0
   firebase_storage: ^11.6.0
   intl: ^0.17.0
+  carousel_slider: ^4.0.0
+
 
 
 dev_dependencies:

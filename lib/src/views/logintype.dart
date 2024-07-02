@@ -31,7 +31,13 @@ class Logintype extends StatelessWidget {
                   width: double.infinity, // Full width
                   height: 50, // Set the height as desired
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                LoginScreen()), // Replace with your home screen
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       primary: Colors
                           .lightGreenAccent[700], // Set the background color

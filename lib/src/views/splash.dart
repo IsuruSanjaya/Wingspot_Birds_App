@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:wingspot/src/views/home.dart';
+import 'package:wingspot/src/views/login.dart';
+import 'package:wingspot/src/views/logintype.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => Logintype()),
       );
     });
   }
@@ -35,11 +37,8 @@ class _SplashScreenState extends State<SplashScreen> {
             fit: BoxFit.cover,
           ),
           // Centered logo and loader
-          
         ],
       ),
     );
   }
 }
-
-
