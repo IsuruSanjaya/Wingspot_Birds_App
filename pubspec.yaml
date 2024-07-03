@@ -44,6 +44,8 @@ dependencies:
   firebase_storage: ^11.6.0
   intl: ^0.17.0
   carousel_slider: ^4.0.0
+  shared_preferences: ^2.0.8
+
 
 
 

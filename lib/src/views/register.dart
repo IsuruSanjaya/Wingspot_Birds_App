@@ -49,12 +49,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final String username = _usernameController.text.trim();
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
       String? imageUrl;
 
       if (_image != null) {
         // Upload image to Firebase Storage
-        final storageRef = FirebaseStorage.instance.ref().child('user_images').child('${userCredential.user!.uid}.jpg');
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('user_images')
+            .child('${userCredential.user!.uid}.jpg');
         await storageRef.putFile(_image!);
 
         // Get download URL of the uploaded image
@@ -62,7 +66,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
 
       // Save user data to Firestore
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
         'name': name,
         'mobileNo': mobileNo,
         'email': email,
@@ -83,7 +90,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Navigate to home screen
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(
+            builder: (context) => HomeScreen(
+                  userId: '',
+                )),
       );
     } catch (e) {
       // Show error message
@@ -119,7 +129,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           // Transparent overlay
           Container(
-            color: Colors.white.withOpacity(0.5), // Semi-transparent white color
+            color:
+                Colors.white.withOpacity(0.5), // Semi-transparent white color
           ),
           Center(
             child: AbsorbPointer(
@@ -189,7 +200,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: ElevatedButton(
                                 onPressed: _getImage,
                                 style: ElevatedButton.styleFrom(
-                                  primary: Color.fromARGB(255, 231, 44, 44), // Light green color
+                                  primary: Color.fromARGB(
+                                      255, 231, 44, 44), // Light green color
                                 ),
                                 child: Text('Add Image'),
                               ),
@@ -205,14 +217,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _register,
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.lightGreen,
-                            foregroundColor: Colors.white // Light green color
-                          ),
+                              primary: Colors.lightGreen,
+                              foregroundColor: Colors.white // Light green color
+                              ),
                           child: Text('Register'),
                         ),
                       ),
                     ],
-
                   ),
                 ),
               ),
