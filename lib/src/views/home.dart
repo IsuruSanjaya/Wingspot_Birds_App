@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:wingspot/src/views/chat.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -10,17 +12,138 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late List<Widget> _pages;
+  List<String> _imageUrls = [];
 
-  final List<Widget> _pages = [
-    Center(child: Text('Home')),
-    Center(child: Text('Chat')),
-    Center(child: Text('Notifications')),
-    Center(child: Text('Profile')),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchImageUrls();
+    _pages = [
+      Column(
+        children: [
+          SizedBox(height: 50), // Space from the top
+          _buildImageSlider(),
+          Expanded(
+            child: Center(child: Text('Home')),
+          ),
+        ],
+      ),
+      Center(child: Text('Chat')),
+      Center(child: Text('Notifications')),
+      Center(child: Text('Profile')),
+    ];
+  }
+
+  Future<void> _fetchImageUrls() async {
+    try {
+      final ListResult result =
+          await FirebaseStorage.instance.ref().child('birds').listAll();
+
+      final List<String> urls = await Future.wait(
+          result.items.map((Reference ref) => ref.getDownloadURL()));
+      setState(() {
+        _imageUrls = urls;
+      });
+    } catch (e) {
+      print('Fetched image URLs: $_imageUrls');
+    }
+  }
+
+  Widget _buildImageSlider() {
+    if (_imageUrls.isEmpty) {
+      return Center(child: Text('No images found'));
+    }
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 200.0,
+        autoPlay: true,
+        enlargeCenterPage: true,
+        aspectRatio: 16 / 9,
+        autoPlayInterval: Duration(seconds: 3),
+        autoPlayAnimationDuration: Duration(milliseconds: 800),
+        autoPlayCurve: Curves.fastOutSlowIn,
+      ),
+      items: _imageUrls.map((url) {
+        return Builder(
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              margin: EdgeInsets.symmetric(horizontal: 5.0),
+              decoration: BoxDecoration(
+                color: Colors.amber,
+              ),
+              child: Image.network(
+                url,
+                fit: BoxFit.cover,
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  print('Error loading image: $exception');
+                  return Center(child: Icon(Icons.error));
+                },
+              ),
+            );
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  // Widget _buildImageSlider() {
+  //   if (_imageUrls.isEmpty) {
+  //     return Center(child: CircularProgressIndicator());
+  //   }
+  //   return CarouselSlider(
+  //     options: CarouselOptions(
+  //       height: 200.0,
+  //       autoPlay: true,
+  //       enlargeCenterPage: true,
+  //       aspectRatio: 16 / 9,
+  //       autoPlayInterval: Duration(seconds: 3),
+  //       autoPlayAnimationDuration: Duration(milliseconds: 800),
+  //       autoPlayCurve: Curves.fastOutSlowIn,
+  //     ),
+  //     items: _imageUrls.map((url) {
+  //       return Builder(
+  //         builder: (BuildContext context) {
+  //           return Container(
+  //             width: MediaQuery.of(context).size.width,
+  //             margin: EdgeInsets.symmetric(horizontal: 5.0),
+  //             decoration: BoxDecoration(
+  //               color: Colors.amber,
+  //             ),
+  //             child: Image.network(
+  //               url,
+  //               fit: BoxFit.cover,
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     }).toList(),
+  //   );
+  // }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (index == 1) {
+        Navigator.pushNamed(context, '/chat');
+      }
     });
   }
 
