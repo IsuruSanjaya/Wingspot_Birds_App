@@ -194,7 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.blue, // Set the background color
+                        primary: Color.fromARGB(
+                            255, 28, 87, 2), // Set the background color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

@@ -30,24 +30,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserData() async {
-    if (widget.userId != null) {
-      _userId = widget.userId;
+    if (widget.userId != null && widget.userId!.isNotEmpty) {
+      _userId = widget.userId!;
       // Here you can call a function to load additional user data
-      _loadAdditionalUserData();
+      _loadAdditionalUserData(_userId);
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         _userId = prefs.getString('userId');
         // Load other user data
-        _loadAdditionalUserData();
+        _loadAdditionalUserData(_userId);
       });
     }
   }
 
-  void _loadAdditionalUserData() async {
+  void _loadAdditionalUserData(String? userId) async {
+    if (userId == null || userId.isEmpty) {
+      print('User ID is null or empty');
+      return;
+    }
+
     // Replace 'users' with your Firestore collection name and 'userId' with the actual user ID
     DocumentSnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(_userId).get();
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
 
     if (snapshot.exists) {
       setState(() {
@@ -80,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(height: 50),
+          const SizedBox(height: 50),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -89,44 +94,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundImage: NetworkImage(_userImageUrl),
                   radius: 25,
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Text(
                   'Welcome $_userName!',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 // Display a single bird image
                 _imageUrls.isNotEmpty
-                    ? CircleAvatar(
-                        backgroundImage: AssetImage('assets/images/hbird.png'),
+                    ? const CircleAvatar(
+                        backgroundImage: AssetImage('assets/images/hb.png'),
                         radius: 25,
                       )
                     : Container(), // Display an empty container or placeholder if _imageUrls is empty
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
                 _buildTabButton('Categories'),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _buildTabButton('New & Noteworthy'),
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildFeaturedGameCard(),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildImageSlider(),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
             height: 200,
-            child: Center(child: Text('Home')),
+            child: const Center(child: Text('Home')),
           ),
         ],
       ),
@@ -139,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
       style: ElevatedButton.styleFrom(
         primary: Colors.grey[200],
         onPrimary: Colors.black,
-        shape: StadiumBorder(),
+        shape: const StadiumBorder(),
       ),
       child: Text(title),
     );
@@ -169,10 +175,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 10,
                   child: Row(
                     children: [
-                      Icon(Icons.apple, color: Colors.white),
-                      SizedBox(width: 5),
-                      Icon(Icons.android, color: Colors.white),
-                      SizedBox(width: 5),
+                      const Icon(Icons.apple, color: Colors.white),
+                      const SizedBox(width: 5),
+                      const Icon(Icons.android, color: Colors.white),
+                      const SizedBox(width: 5),
                     ],
                   ),
                 ),
@@ -183,15 +189,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       primary: Colors.pink,
-                      shape: StadiumBorder(),
+                      shape: const StadiumBorder(),
                     ),
-                    child: Text('Birds'),
+                    child: const Text('Birds'),
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Text(
                 'Horizon Zero Dawn',
                 style: TextStyle(
@@ -200,14 +206,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'Recommended because you played games tagged with...',
                 style: TextStyle(color: Colors.grey),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -216,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildImageSlider() {
     if (_imageUrls.isEmpty) {
-      return Center(child: Text('No images found'));
+      return const Center(child: Text('No images found'));
     }
 
     return CarouselSlider(
@@ -225,8 +231,8 @@ class _HomeScreenState extends State<HomeScreen> {
         autoPlay: true,
         enlargeCenterPage: true,
         aspectRatio: 16 / 9,
-        autoPlayInterval: Duration(seconds: 3),
-        autoPlayAnimationDuration: Duration(milliseconds: 800),
+        autoPlayInterval: const Duration(seconds: 3),
+        autoPlayAnimationDuration: const Duration(milliseconds: 800),
         autoPlayCurve: Curves.fastOutSlowIn,
       ),
       items: _imageUrls.map((url) {
@@ -234,8 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (BuildContext context) {
             return Container(
               width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.symmetric(horizontal: 5.0),
-              decoration: BoxDecoration(
+              margin: const EdgeInsets.symmetric(horizontal: 5.0),
+              decoration: const BoxDecoration(
                 color: Colors.amber,
               ),
               child: Image.network(
@@ -258,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 errorBuilder: (BuildContext context, Object exception,
                     StackTrace? stackTrace) {
                   print('Error loading image: $exception');
-                  return Center(child: Icon(Icons.error));
+                  return const Center(child: Icon(Icons.error));
                 },
               ),
             );
@@ -283,13 +289,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          Color.fromARGB(255, 255, 255, 255), // Dark blue background color
+
       body: _selectedIndex == 0
           ? _buildHomePage()
           : _selectedIndex == 1
-              ? Center(child: Text('Chat'))
+              ? const Center(child: Text('Chat'))
               : _selectedIndex == 2
-                  ? Center(child: Text('Notifications'))
-                  : Center(child: Text('Profile')),
+                  ? const Center(child: Text('Notifications'))
+                  : const Center(child: Text('Profile')),
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -310,8 +319,15 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromARGB(255, 52, 73, 85),
+            Color.fromARGB(255, 80, 114, 123),
+          ],
+        ),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -325,25 +341,27 @@ class CustomBottomNavigationBar extends StatelessWidget {
         ],
       ),
       child: BottomNavigationBar(
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+        backgroundColor: Color.fromARGB(86, 9, 152, 6),
+        selectedItemColor: Color.fromARGB(255, 0, 0, 0),
+        unselectedItemColor: Colors.white.withOpacity(0.6),
         currentIndex: selectedIndex,
         type: BottomNavigationBarType.fixed,
+        elevation: 0,
         items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 30),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.message, size: 30),
             label: 'Chat',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.notifications, size: 30),
             label: 'Notifications',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person, size: 30),
             label: 'Profile',
           ),
         ],

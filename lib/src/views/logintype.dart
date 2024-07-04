@@ -39,8 +39,8 @@ class Logintype extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Colors
-                          .lightGreenAccent[700], // Set the background color
+                      primary: Color.fromARGB(
+                          255, 28, 87, 2), // Set the background color
                     ),
                     child: const Text(
                       'User',
@@ -58,8 +58,8 @@ class Logintype extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      primary: Colors
-                          .lightGreenAccent[700], // Set the background color
+                      primary: Color.fromARGB(
+                          255, 28, 87, 2), // Set the background color
                     ),
                     child: const Text(
                       'Admin',

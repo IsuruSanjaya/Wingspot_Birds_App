@@ -19,13 +19,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoginScreen(),
+      home: Logintype(),
       routes: {
         '/home': (context) =>
             HomeScreen(userId: FirebaseAuth.instance.currentUser?.uid),
         '/chat': (context) => ChatScreen(),
         '/profile': (context) => Profile(),
         '/login': (context) => LoginScreen(),
+        '/logint': (context) => Logintype(),
       },
     );
   }

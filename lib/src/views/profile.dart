@@ -62,8 +62,9 @@ class _ProfileState extends State<Profile> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                Logintype()), // Replace with your login screen widget
+          builder: (context) =>
+              Logintype(), // Replace with your login screen widget
+        ),
       );
     } catch (e) {
       print("Error logging out: $e");
@@ -75,8 +76,30 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        backgroundColor: Colors.transparent, // Transparent app bar background
+        elevation: 0,
+        centerTitle: true, // No shadow
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Text color for the app bar title
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back, // Back arrow icon
+            color: Colors.white, // Color of the arrow icon
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context,
+                '/home'); // Navigate back to the previous screen (usually the home screen)
+          },
+        ),
       ),
+      backgroundColor:
+          Color.fromARGB(255, 18, 55, 42), // Dark blue background color
       body: userData == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -94,6 +117,7 @@ class _ProfileState extends State<Profile> {
                     userData!['username'],
                     style: const TextStyle(
                       fontSize: 24,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -102,7 +126,11 @@ class _ProfileState extends State<Profile> {
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ListTile(
-                    leading: const Icon(Icons.person),
+                    leading: Image.asset(
+                      'assets/images/user.png', // Replace with your image asset path
+                      width: 28, // Adjust width as needed
+                      height: 28, // Adjust height as needed
+                    ),
                     title: const Text('Name'),
                     subtitle: Text(userData!['name']),
                   ),
@@ -110,7 +138,11 @@ class _ProfileState extends State<Profile> {
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ListTile(
-                    leading: const Icon(Icons.email),
+                    leading: Image.asset(
+                      'assets/images/gmail.png', // Replace with your image asset path
+                      width: 24, // Adjust width as needed
+                      height: 24, // Adjust height as needed
+                    ),
                     title: const Text('Email'),
                     subtitle: Text(userData!['email']),
                   ),
@@ -118,12 +150,16 @@ class _ProfileState extends State<Profile> {
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ListTile(
-                    leading: const Icon(Icons.phone),
+                    leading: Image.asset(
+                      'assets/images/phone-call.png', // Replace with your image asset path
+                      width: 24, // Adjust width as needed
+                      height: 24, // Adjust height as needed
+                    ),
                     title: const Text('Mobile'),
                     subtitle: Text(userData!['mobileNo']),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 100),
                 Center(
                   child: ElevatedButton(
                     onPressed: _logout,
