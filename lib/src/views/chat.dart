@@ -155,13 +155,13 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildPreview() {
     if (_imageFile == null) return const SizedBox.shrink();
     return Container(
-      color: Colors.grey[200], // Set the background color
+      color: Colors.grey[500], // Set the background color
       padding: const EdgeInsets.all(8.0), // Add padding
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.file(_imageFile!, width: 100, height: 100, fit: BoxFit.cover),
+            Image.file(_imageFile!, width: 250, height: 250, fit: BoxFit.cover),
             const SizedBox(height: 8.0), // Add spacing between image and row
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -185,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       body: WillPopScope(
         onWillPop: () async {
-          Navigator.of(context).pop();
+          Navigator.pushNamed(context, '/home');
           return true;
         },
         child: Column(
@@ -200,8 +200,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                            builder: (context) =>
-                                const HomeScreen()), // Replace with your home screen
+                            builder: (context) => const HomeScreen(
+                                  userId: '',
+                                )), // Replace with your home screen
                       );
                     },
                   ),
