@@ -208,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                             builder: (context) =>
-                                const RegisterScreen()), // Replace with your home screen
+                                const RegisterScreen()), // Replace with your register screen
                       );
                     },
                     child: Text(

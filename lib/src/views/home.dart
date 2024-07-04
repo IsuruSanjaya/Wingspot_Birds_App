@@ -1,4 +1,4 @@
-// home.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,40 +16,48 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  late List<Widget> _pages;
   List<String> _imageUrls = [];
   String? _userId;
+  String _userName = 'Default Name'; // Initialized with a default value
+  String _userImageUrl =
+      'default_image_url.png'; // Initialized with a default value
 
   @override
   void initState() {
     super.initState();
-    _loadUserId();
-
     _fetchImageUrls();
-    _pages = [
-      Column(
-        children: [
-          SizedBox(height: 50), // Space from the top
-          _buildImageSlider(),
-          Expanded(
-            child: Center(child: Text('Home')),
-          ),
-        ],
-      ),
-      Center(child: Text('Chat')),
-      Center(child: Text('Notifications')),
-      Center(child: Text('Profile')),
-    ];
+    _loadUserData();
   }
 
-  Future<void> _loadUserId() async {
+  Future<void> _loadUserData() async {
     if (widget.userId != null) {
       _userId = widget.userId;
+      // Here you can call a function to load additional user data
+      _loadAdditionalUserData();
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         _userId = prefs.getString('userId');
+        // Load other user data
+        _loadAdditionalUserData();
       });
+    }
+  }
+
+  void _loadAdditionalUserData() async {
+    // Replace 'users' with your Firestore collection name and 'userId' with the actual user ID
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(_userId).get();
+
+    if (snapshot.exists) {
+      setState(() {
+        var userData = snapshot.data();
+        _userName = userData!['name'] ?? 'Default Name';
+        _userImageUrl = userData['imageUrl'] ?? 'default_image_url.png';
+        // Update UI with fetched data
+      });
+    } else {
+      print('Document does not exist');
     }
   }
 
@@ -64,8 +72,146 @@ class _HomeScreenState extends State<HomeScreen> {
         _imageUrls = urls;
       });
     } catch (e) {
-      print('Fetched image URLs: $_imageUrls');
+      print('Error fetching image URLs: $e');
     }
+  }
+
+  Widget _buildHomePage() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(height: 50),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(_userImageUrl),
+                  radius: 25,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'Welcome $_userName!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Spacer(),
+                // Display a single bird image
+                _imageUrls.isNotEmpty
+                    ? CircleAvatar(
+                        backgroundImage: AssetImage('assets/images/hbird.png'),
+                        radius: 25,
+                      )
+                    : Container(), // Display an empty container or placeholder if _imageUrls is empty
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                _buildTabButton('Categories'),
+                SizedBox(width: 10),
+                _buildTabButton('New & Noteworthy'),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+          _buildFeaturedGameCard(),
+          SizedBox(height: 20),
+          _buildImageSlider(),
+          SizedBox(height: 20),
+          Container(
+            height: 200,
+            child: Center(child: Text('Home')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String title) {
+    return ElevatedButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        primary: Colors.grey[200],
+        onPrimary: Colors.black,
+        shape: StadiumBorder(),
+      ),
+      child: Text(title),
+    );
+  }
+
+  Widget _buildFeaturedGameCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Image.network(
+                  'https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcRy1-sy_4UzjKSwnTP8y2Lp_vVtcnGRvu4nEaNUuv0dgHSTZdvjg2vmqKpTk94HWPxmpjHiATjcLIae9F0qYU08OObujZDcBVv263MWZQN4U6uJ3LAUqujMDiKPhqfOBAz9Pb_6-o4R',
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Row(
+                    children: [
+                      Icon(Icons.apple, color: Colors.white),
+                      SizedBox(width: 5),
+                      Icon(Icons.android, color: Colors.white),
+                      SizedBox(width: 5),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.pink,
+                      shape: StadiumBorder(),
+                    ),
+                    child: Text('Birds'),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Horizon Zero Dawn',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Recommended because you played games tagged with...',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildImageSlider() {
@@ -125,18 +271,25 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (index == 1) {
-        Navigator.pushNamed(context, '/chat');
-      } else if (index == 3) {
-        Navigator.pushNamed(context, '/profile', arguments: widget.userId);
-      }
     });
+
+    if (index == 1) {
+      Navigator.pushNamed(context, '/chat');
+    } else if (index == 3) {
+      Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: _selectedIndex == 0
+          ? _buildHomePage()
+          : _selectedIndex == 1
+              ? Center(child: Text('Chat'))
+              : _selectedIndex == 2
+                  ? Center(child: Text('Notifications'))
+                  : Center(child: Text('Profile')),
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -158,74 +311,46 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 16, 255, 72),
+        color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
         boxShadow: [
           BoxShadow(
-            color: Color.fromARGB(255, 38, 255, 0).withOpacity(0.5),
+            color: Colors.black12,
             spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, -2), // changes position of shadow
+            blurRadius: 10,
           ),
         ],
       ),
       child: BottomNavigationBar(
-        selectedItemColor: Color.fromARGB(255, 0, 0, 0),
+        selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         currentIndex: selectedIndex,
         type: BottomNavigationBarType.fixed,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: buildIcon(Icons.home, Colors.red, 0),
+            icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: buildIcon(Icons.message, Colors.blue, 1),
+            icon: Icon(Icons.message),
             label: 'Chat',
           ),
           BottomNavigationBarItem(
-            icon: buildIcon(Icons.notifications, Colors.green, 2),
+            icon: Icon(Icons.notifications),
             label: 'Notifications',
           ),
           BottomNavigationBarItem(
-            icon: buildIcon(Icons.person, Colors.orange, 3),
+            icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
         onTap: onItemTapped,
         showUnselectedLabels: true,
         showSelectedLabels: true,
-        selectedLabelStyle: TextStyle(
-          color: Color.fromARGB(255, 0, 0, 0),
-        ),
-        unselectedLabelStyle: TextStyle(
-          color: Color.fromARGB(255, 0, 0, 0),
-        ),
       ),
-    );
-  }
-
-  Widget buildIcon(IconData iconData, Color color, int index) {
-    return Stack(
-      children: [
-        Icon(iconData, color: color),
-        if (selectedIndex == index)
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

@@ -185,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       body: WillPopScope(
         onWillPop: () async {
-          Navigator.of(context).pop();
+          Navigator.pushNamed(context, '/home');
           return true;
         },
         child: Column(

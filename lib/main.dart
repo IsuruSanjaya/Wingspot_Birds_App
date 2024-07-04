@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:wingspot/src/views/chat.dart';
@@ -20,9 +21,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: LoginScreen(),
       routes: {
-        '/home': (context) => HomeScreen(
-              userId: '',
-            ),
+        '/home': (context) =>
+            HomeScreen(userId: FirebaseAuth.instance.currentUser?.uid),
         '/chat': (context) => ChatScreen(),
         '/profile': (context) => Profile(),
         '/login': (context) => LoginScreen(),
