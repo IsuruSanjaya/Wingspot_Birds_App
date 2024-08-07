@@ -18,9 +18,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   List<String> _imageUrls = [];
   String? _userId;
+  String? _role;
+
   String _userName = 'Default Name'; // Initialized with a default value
   String _userImageUrl =
-      'default_image_url.png'; // Initialized with a default value
+      'assets/images/hbird.png'; // Initialized with a default value
 
   @override
   void initState() {
@@ -30,30 +32,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserData() async {
-    if (widget.userId != null) {
-      _userId = widget.userId;
+    if (widget.userId != null && widget.userId!.isNotEmpty) {
+      _userId = widget.userId!;
+
       // Here you can call a function to load additional user data
-      _loadAdditionalUserData();
+      _loadAdditionalUserData(_userId);
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         _userId = prefs.getString('userId');
+        _role = prefs.getString('role');
         // Load other user data
-        _loadAdditionalUserData();
+        _loadAdditionalUserData(_userId);
       });
     }
   }
 
-  void _loadAdditionalUserData() async {
+  void _loadAdditionalUserData(String? userId) async {
+    if (userId == null || userId.isEmpty) {
+      print('User ID is null or empty');
+      return;
+    }
+
     // Replace 'users' with your Firestore collection name and 'userId' with the actual user ID
     DocumentSnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(_userId).get();
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
 
     if (snapshot.exists) {
       setState(() {
         var userData = snapshot.data();
         _userName = userData!['name'] ?? 'Default Name';
-        _userImageUrl = userData['imageUrl'] ?? 'default_image_url.png';
+        _userImageUrl = userData['imageUrl'] ?? 'assets/images/hbird.png';
+        _role = userData['role'] ?? 'user';
         // Update UI with fetched data
       });
     } else {
@@ -80,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(height: 50),
+          const SizedBox(height: 50),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -89,45 +99,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundImage: NetworkImage(_userImageUrl),
                   radius: 25,
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Text(
                   'Welcome $_userName!',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 // Display a single bird image
                 _imageUrls.isNotEmpty
-                    ? CircleAvatar(
-                        backgroundImage: AssetImage('assets/images/hbird.png'),
+                    ? const CircleAvatar(
+                        backgroundImage: AssetImage('assets/images/hb.png'),
                         radius: 25,
                       )
                     : Container(), // Display an empty container or placeholder if _imageUrls is empty
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
                 _buildTabButton('Categories'),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _buildTabButton('New & Noteworthy'),
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildFeaturedGameCard(),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildImageSlider(),
-          SizedBox(height: 20),
-          Container(
-            height: 200,
-            child: Center(child: Text('Home')),
-          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -137,9 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        primary: Colors.grey[200],
+        primary: const Color.fromARGB(255, 100, 160, 11),
         onPrimary: Colors.black,
-        shape: StadiumBorder(),
+        shape: const StadiumBorder(),
       ),
       child: Text(title),
     );
@@ -168,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   top: 10,
                   left: 10,
                   child: Row(
-                    children: [
+                    children: const [
                       Icon(Icons.apple, color: Colors.white),
                       SizedBox(width: 5),
                       Icon(Icons.android, color: Colors.white),
@@ -182,16 +189,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.pink,
-                      shape: StadiumBorder(),
+                      primary: const Color.fromARGB(255, 54, 133, 8),
+                      shape: const StadiumBorder(),
                     ),
-                    child: Text('Birds'),
+                    child: const Text('Birds'),
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Text(
                 'Horizon Zero Dawn',
                 style: TextStyle(
@@ -200,14 +207,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'Recommended because you played games tagged with...',
                 style: TextStyle(color: Colors.grey),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -216,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildImageSlider() {
     if (_imageUrls.isEmpty) {
-      return Center(child: Text('No images found'));
+      return const Center(child: Text('No images found'));
     }
 
     return CarouselSlider(
@@ -225,8 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
         autoPlay: true,
         enlargeCenterPage: true,
         aspectRatio: 16 / 9,
-        autoPlayInterval: Duration(seconds: 3),
-        autoPlayAnimationDuration: Duration(milliseconds: 800),
+        autoPlayInterval: const Duration(seconds: 3),
+        autoPlayAnimationDuration: const Duration(milliseconds: 800),
         autoPlayCurve: Curves.fastOutSlowIn,
       ),
       items: _imageUrls.map((url) {
@@ -234,8 +241,8 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (BuildContext context) {
             return Container(
               width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.symmetric(horizontal: 5.0),
-              decoration: BoxDecoration(
+              margin: const EdgeInsets.symmetric(horizontal: 5.0),
+              decoration: const BoxDecoration(
                 color: Colors.amber,
               ),
               child: Image.network(
@@ -258,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 errorBuilder: (BuildContext context, Object exception,
                     StackTrace? stackTrace) {
                   print('Error loading image: $exception');
-                  return Center(child: Icon(Icons.error));
+                  return const Center(child: Icon(Icons.error));
                 },
               ),
             );
@@ -273,26 +280,31 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
 
-    if (index == 1) {
-      Navigator.pushNamed(context, '/chat');
-    } else if (index == 3) {
-      Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+    if (_role == 'user') {
+      if (index == 1) {
+        Navigator.pushNamed(context, '/chat');
+      } else if (index == 2) {
+        Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+      }
+    } else if (_role == 'admin') {
+      if (index == 1) {
+        Navigator.pushNamed(context, '/admin');
+      } else if (index == 2) {
+        Navigator.pushNamed(context, '/chat');
+      } else if (index == 3) {
+        Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _selectedIndex == 0
-          ? _buildHomePage()
-          : _selectedIndex == 1
-              ? Center(child: Text('Chat'))
-              : _selectedIndex == 2
-                  ? Center(child: Text('Notifications'))
-                  : Center(child: Text('Profile')),
+      body: _buildHomePage(),
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
+        role: _role,
       ),
     );
   }
@@ -300,57 +312,63 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
-  final ValueChanged<int> onItemTapped;
+  final Function(int) onItemTapped;
+  final String? role;
 
-  CustomBottomNavigationBar({
+  const CustomBottomNavigationBar({
+    Key? key,
     required this.selectedIndex,
     required this.onItemTapped,
-  });
+    required this.role,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            spreadRadius: 1,
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        currentIndex: selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: onItemTapped,
-        showUnselectedLabels: true,
-        showSelectedLabels: true,
-      ),
+    final isUser = role == 'user';
+    final items = isUser
+        ? [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat),
+              label: 'Chat',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ]
+        : [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.comment),
+              label: 'Community',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ];
+
+    return BottomNavigationBar(
+      items: items,
+      currentIndex: selectedIndex,
+      selectedItemColor: Colors.white, // White selected item color
+      unselectedItemColor: Colors.white70, // White70 unselected item color
+      backgroundColor:
+          Color.fromARGB(255, 54, 133, 8), // Green background color
+      onTap: onItemTapped,
+      type:
+          BottomNavigationBarType.fixed, // Ensure fixed type to avoid shifting
     );
   }
 }
