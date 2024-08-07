@@ -16,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
+  bool _isLoading = false; // Track loading state
 
   @override
   void dispose() {
@@ -25,6 +26,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      // Show error message
+      Fluttertoast.showToast(
+        msg: 'Please fill all the fields',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -81,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         Fluttertoast.showToast(
-          msg: "An unknown error occurred: ${e.message}",
+          msg: "Please entered the details",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
@@ -98,6 +115,10 @@ class _LoginScreenState extends State<LoginScreen> {
         textColor: Colors.white,
         fontSize: 16.0,
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -111,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                    'assets/images/loginu.png'), // Path to your background image
+                    'assets/images/register.jpg'), // Path to your background image
                 fit: BoxFit.cover,
               ),
             ),
@@ -221,6 +242,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+          if (_isLoading) // Show loader if isLoading is true
+            Container(
+              color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
         ],
       ),
     );

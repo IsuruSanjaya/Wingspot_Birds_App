@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wingspot/src/views/login.dart';
 import 'package:wingspot/src/views/logintype.dart';
 import '../controllers/FirestoreService.dart'; // Adjust the import path as needed
 import '../controllers/AuthService.dart'; // Import your AuthService
@@ -63,7 +64,7 @@ class _ProfileState extends State<Profile> {
         context,
         MaterialPageRoute(
           builder: (context) =>
-              Logintype(), // Replace with your login screen widget
+              LoginScreen(), // Replace with your login screen widget
         ),
       );
     } catch (e) {
@@ -75,113 +76,100 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent, // Transparent app bar background
-        elevation: 0,
-        centerTitle: true, // No shadow
-        title: Text(
-          'Profile',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white, // Text color for the app bar title
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+                'assets/images/register.jpg'), // Path to your background image
+            fit: BoxFit.cover,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back, // Back arrow icon
-            color: Colors.white, // Color of the arrow icon
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context,
-                '/home'); // Navigate back to the previous screen (usually the home screen)
-          },
-        ),
-      ),
-      backgroundColor:
-          Color.fromARGB(255, 18, 55, 42), // Dark blue background color
-      body: userData == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                Center(
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(userData!['imageUrl']),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    userData!['username'],
-                    style: const TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+        child: userData == null
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  // Add space between the top and the profile image
+                  SizedBox(height: 80), // Adjust the height as needed
+
+                  Center(
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(userData!['imageUrl']),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    leading: Image.asset(
-                      'assets/images/user.png', // Replace with your image asset path
-                      width: 28, // Adjust width as needed
-                      height: 28, // Adjust height as needed
-                    ),
-                    title: const Text('Name'),
-                    subtitle: Text(userData!['name']),
-                  ),
-                ),
-                Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    leading: Image.asset(
-                      'assets/images/gmail.png', // Replace with your image asset path
-                      width: 24, // Adjust width as needed
-                      height: 24, // Adjust height as needed
-                    ),
-                    title: const Text('Email'),
-                    subtitle: Text(userData!['email']),
-                  ),
-                ),
-                Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    leading: Image.asset(
-                      'assets/images/phone-call.png', // Replace with your image asset path
-                      width: 24, // Adjust width as needed
-                      height: 24, // Adjust height as needed
-                    ),
-                    title: const Text('Mobile'),
-                    subtitle: Text(userData!['mobileNo']),
-                  ),
-                ),
-                const SizedBox(height: 100),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _logout,
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red, // Red background color
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32.0,
-                        vertical: 16.0,
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      userData!['username'],
+                      style: const TextStyle(
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.logout, size: 24), // Logout icon
-                        SizedBox(width: 8),
-                        Text('Logout', style: TextStyle(fontSize: 16)),
-                      ],
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Image.asset(
+                        'assets/images/user.png', // Replace with your image asset path
+                        width: 28, // Adjust width as needed
+                        height: 28, // Adjust height as needed
+                      ),
+                      title: const Text('Name'),
+                      subtitle: Text(userData!['name']),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Image.asset(
+                        'assets/images/gmail.png', // Replace with your image asset path
+                        width: 24, // Adjust width as needed
+                        height: 24, // Adjust height as needed
+                      ),
+                      title: const Text('Email'),
+                      subtitle: Text(userData!['email']),
+                    ),
+                  ),
+                  Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Image.asset(
+                        'assets/images/phone-call.png', // Replace with your image asset path
+                        width: 24, // Adjust width as needed
+                        height: 24, // Adjust height as needed
+                      ),
+                      title: const Text('Mobile'),
+                      subtitle: Text(userData!['mobileNo']),
+                    ),
+                  ),
+                  const SizedBox(height: 80),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _logout,
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.red, // Red background color
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0,
+                          vertical: 16.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.logout, size: 24), // Logout icon
+                          SizedBox(width: 8),
+                          Text('Logout', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

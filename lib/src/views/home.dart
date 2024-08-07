@@ -18,9 +18,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   List<String> _imageUrls = [];
   String? _userId;
+  String? _role;
+
   String _userName = 'Default Name'; // Initialized with a default value
   String _userImageUrl =
-      'default_image_url.png'; // Initialized with a default value
+      'assets/images/hbird.png'; // Initialized with a default value
 
   @override
   void initState() {
@@ -32,12 +34,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadUserData() async {
     if (widget.userId != null && widget.userId!.isNotEmpty) {
       _userId = widget.userId!;
+
       // Here you can call a function to load additional user data
       _loadAdditionalUserData(_userId);
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         _userId = prefs.getString('userId');
+        _role = prefs.getString('role');
         // Load other user data
         _loadAdditionalUserData(_userId);
       });
@@ -58,7 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         var userData = snapshot.data();
         _userName = userData!['name'] ?? 'Default Name';
-        _userImageUrl = userData['imageUrl'] ?? 'default_image_url.png';
+        _userImageUrl = userData['imageUrl'] ?? 'assets/images/hbird.png';
+        _role = userData['role'] ?? 'user';
         // Update UI with fetched data
       });
     } else {
@@ -130,10 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 20),
           _buildImageSlider(),
           const SizedBox(height: 20),
-          Container(
-            height: 200,
-            child: const Center(child: Text('Home')),
-          ),
         ],
       ),
     );
@@ -143,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        primary: Colors.grey[200],
+        primary: const Color.fromARGB(255, 100, 160, 11),
         onPrimary: Colors.black,
         shape: const StadiumBorder(),
       ),
@@ -174,11 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   top: 10,
                   left: 10,
                   child: Row(
-                    children: [
-                      const Icon(Icons.apple, color: Colors.white),
-                      const SizedBox(width: 5),
-                      const Icon(Icons.android, color: Colors.white),
-                      const SizedBox(width: 5),
+                    children: const [
+                      Icon(Icons.apple, color: Colors.white),
+                      SizedBox(width: 5),
+                      Icon(Icons.android, color: Colors.white),
+                      SizedBox(width: 5),
                     ],
                   ),
                 ),
@@ -188,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.pink,
+                      primary: const Color.fromARGB(255, 54, 133, 8),
                       shape: const StadiumBorder(),
                     ),
                     child: const Text('Birds'),
@@ -279,29 +280,31 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
 
-    if (index == 1) {
-      Navigator.pushNamed(context, '/chat');
-    } else if (index == 3) {
-      Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+    if (_role == 'user') {
+      if (index == 1) {
+        Navigator.pushNamed(context, '/chat');
+      } else if (index == 2) {
+        Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+      }
+    } else if (_role == 'admin') {
+      if (index == 1) {
+        Navigator.pushNamed(context, '/admin');
+      } else if (index == 2) {
+        Navigator.pushNamed(context, '/chat');
+      } else if (index == 3) {
+        Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Color.fromARGB(255, 255, 255, 255), // Dark blue background color
-
-      body: _selectedIndex == 0
-          ? _buildHomePage()
-          : _selectedIndex == 1
-              ? const Center(child: Text('Chat'))
-              : _selectedIndex == 2
-                  ? const Center(child: Text('Notifications'))
-                  : const Center(child: Text('Profile')),
+      body: _buildHomePage(),
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
+        role: _role,
       ),
     );
   }
@@ -309,66 +312,63 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
-  final ValueChanged<int> onItemTapped;
+  final Function(int) onItemTapped;
+  final String? role;
 
-  CustomBottomNavigationBar({
+  const CustomBottomNavigationBar({
+    Key? key,
     required this.selectedIndex,
     required this.onItemTapped,
-  });
+    required this.role,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color.fromARGB(255, 52, 73, 85),
-            Color.fromARGB(255, 80, 114, 123),
-          ],
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            spreadRadius: 1,
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: Color.fromARGB(86, 9, 152, 6),
-        selectedItemColor: Color.fromARGB(255, 0, 0, 0),
-        unselectedItemColor: Colors.white.withOpacity(0.6),
-        currentIndex: selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
-        items: <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home, size: 30),
-            label: 'Home',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.message, size: 30),
-            label: 'Chat',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.notifications, size: 30),
-            label: 'Notifications',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person, size: 30),
-            label: 'Profile',
-          ),
-        ],
-        onTap: onItemTapped,
-        showUnselectedLabels: true,
-        showSelectedLabels: true,
-      ),
+    final isUser = role == 'user';
+    final items = isUser
+        ? [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat),
+              label: 'Chat',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ]
+        : [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.comment),
+              label: 'Community',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ];
+
+    return BottomNavigationBar(
+      items: items,
+      currentIndex: selectedIndex,
+      selectedItemColor: Colors.white, // White selected item color
+      unselectedItemColor: Colors.white70, // White70 unselected item color
+      backgroundColor:
+          Color.fromARGB(255, 54, 133, 8), // Green background color
+      onTap: onItemTapped,
+      type:
+          BottomNavigationBarType.fixed, // Ensure fixed type to avoid shifting
     );
   }
 }

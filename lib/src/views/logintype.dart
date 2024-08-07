@@ -40,34 +40,40 @@ class Logintype extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Color.fromARGB(
-                          255, 28, 87, 2), // Set the background color
+                          184, 255, 255, 255), // Set the background color
                     ),
                     child: const Text(
-                      'User',
-                      style: TextStyle(fontSize: 18), // Set the font size
+                      'USER lOGIN',
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Color.fromARGB(
+                              255, 0, 0, 0)), // Set the font size
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 20), // Add some space between the buttons
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: SizedBox(
-                  width: double.infinity, // Full width
-                  height: 50, // Set the height as desired
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(
-                          255, 28, 87, 2), // Set the background color
-                    ),
-                    child: const Text(
-                      'Admin',
-                      style: TextStyle(fontSize: 18), // Set the font size
-                    ),
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              //   child: SizedBox(
+              //     width: double.infinity, // Full width
+              //     height: 50, // Set the height as desired
+              //     child: ElevatedButton(
+              //       onPressed: () {},
+              //       style: ElevatedButton.styleFrom(
+              //         primary: Color.fromARGB(
+              //             171, 255, 255, 255), // Set the background color
+              //       ),
+              //       child: const Text(
+              //         'ADMIN',
+              //         style: TextStyle(
+              //             fontSize: 18,
+              //             color: Color.fromARGB(
+              //                 255, 0, 0, 0)), // Set the font size
+              //       ),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 40), // Add space at the bottom
             ],
           ),
