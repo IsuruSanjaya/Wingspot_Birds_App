@@ -35,11 +35,11 @@ class Logintype extends StatelessWidget {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                             builder: (context) =>
-                                LoginScreen()), // Replace with your home screen
+                                const LoginScreen()), // Replace with your home screen
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(
+                      primary: const Color.fromARGB(
                           184, 255, 255, 255), // Set the background color
                     ),
                     child: const Text(
