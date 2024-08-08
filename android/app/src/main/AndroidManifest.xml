@@ -7,7 +7,7 @@
         android:label="wingspot"
         android:usesCleartextTraffic="true"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/logo1">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -144,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        primary: const Color.fromARGB(255, 100, 160, 11),
-        onPrimary: Colors.black,
+        primary: const Color.fromARGB(255, 18, 71, 33),
+        onPrimary: Colors.white,
         shape: const StadiumBorder(),
       ),
       child: Text(title),
@@ -189,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      primary: const Color.fromARGB(255, 54, 133, 8),
+                      primary: const Color.fromARGB(255, 18, 71, 33),
                       shape: const StadiumBorder(),
                     ),
                     child: const Text('Birds'),
@@ -327,33 +327,33 @@ class CustomBottomNavigationBar extends StatelessWidget {
     final isUser = role == 'user';
     final items = isUser
         ? [
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.chat),
               label: 'Chat',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
           ]
         : [
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings),
               label: 'Admin',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.comment),
               label: 'Community',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
@@ -365,7 +365,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       selectedItemColor: Colors.white, // White selected item color
       unselectedItemColor: Colors.white70, // White70 unselected item color
       backgroundColor:
-          Color.fromARGB(255, 54, 133, 8), // Green background color
+          const Color.fromARGB(255, 18, 71, 33), // Green background color
       onTap: onItemTapped,
       type:
           BottomNavigationBarType.fixed, // Ensure fixed type to avoid shifting

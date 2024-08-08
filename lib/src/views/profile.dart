@@ -64,7 +64,7 @@ class _ProfileState extends State<Profile> {
         context,
         MaterialPageRoute(
           builder: (context) =>
-              LoginScreen(), // Replace with your login screen widget
+              const LoginScreen(), // Replace with your login screen widget
         ),
       );
     } catch (e) {
@@ -77,7 +77,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
                 'assets/images/register.jpg'), // Path to your background image
@@ -90,7 +90,7 @@ class _ProfileState extends State<Profile> {
                 padding: const EdgeInsets.all(16.0),
                 children: [
                   // Add space between the top and the profile image
-                  SizedBox(height: 80), // Adjust the height as needed
+                  const SizedBox(height: 80), // Adjust the height as needed
 
                   Center(
                     child: CircleAvatar(
