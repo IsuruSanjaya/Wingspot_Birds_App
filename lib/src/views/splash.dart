@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:wingspot/src/views/home.dart';
 import 'package:wingspot/src/views/login.dart';
@@ -16,13 +18,29 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate to home screen after 4 seconds
-    Timer(Duration(seconds: 5), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+    _checkConnectivity();
+  }
+
+  Future<void> _checkConnectivity() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      Fluttertoast.showToast(
+        msg:
+            "No Internet Connection. Please connect to the internet and try again.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
-    });
+    } else {
+      // Navigate to login screen after 5 seconds if internet is connected
+      Timer(Duration(seconds: 5), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      });
+    }
   }
 
   @override
@@ -36,7 +54,16 @@ class _SplashScreenState extends State<SplashScreen> {
             'assets/images/login.png',
             fit: BoxFit.cover,
           ),
-          // Centered logo and loader
+          // Centered loader
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Loader
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ),
         ],
       ),
     );

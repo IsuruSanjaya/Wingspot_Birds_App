@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:wingspot/src/views/Behaviour/audioScreen.dart';
+import 'package:wingspot/src/views/Behaviour/bDashboard.dart';
 import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
 import 'package:wingspot/src/views/Category/bird.dart';
 import 'package:wingspot/src/views/chat.dart';
@@ -22,14 +23,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const SplashScreen(),
+      home: const AnalysisScreen(),
       routes: {
         '/home': (context) =>
             HomeScreen(userId: FirebaseAuth.instance.currentUser?.uid),
         '/chat': (context) => const BirdScreen(),
         '/profile': (context) => const Profile(),
         '/login': (context) => const LoginScreen(),
-        '/admin': (context) => const AudioScreen(),
+        '/birda': (context) => const AudioScreen(),
       },
     );
   }

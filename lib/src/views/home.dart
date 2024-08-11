@@ -86,6 +86,67 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Widget _buildAnalysisButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          _buildButtonWithImageIcon(
+            'Bird Species Analysis',
+            'assets/images/dove.png',
+            const Color.fromARGB(255, 18, 71, 33),
+          ),
+          const SizedBox(height: 10),
+          _buildButtonWithImageIcon(
+            'Egg Behavior Analysis',
+            'assets/images/egg.png',
+            const Color.fromARGB(255, 18, 71, 33),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButtonWithImageIcon(
+      String title, String imagePath, Color color) {
+    return SizedBox(
+      width: double.infinity, // Makes the button take up the full width
+      height: 50.0, // Fixed height for the button
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/birda');
+          // Add your navigation logic here
+        },
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.center, // Center the content horizontally
+          crossAxisAlignment:
+              CrossAxisAlignment.center, // Center the content vertically
+          children: [
+            ImageIcon(
+              AssetImage(imagePath),
+              size: 24.0, // Set the size of the icon
+              color: Colors.white,
+            ),
+            const SizedBox(width: 10), // Space between icon and text
+            Text(
+              title,
+              style:
+                  const TextStyle(fontSize: 18), // Set a consistent font size
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHomePage() {
     return SingleChildScrollView(
       child: Column(
@@ -109,13 +170,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const Spacer(),
-                // Display a single bird image
                 _imageUrls.isNotEmpty
                     ? const CircleAvatar(
                         backgroundImage: AssetImage('assets/images/hb.png'),
                         radius: 25,
                       )
-                    : Container(), // Display an empty container or placeholder if _imageUrls is empty
+                    : Container(),
               ],
             ),
           ),
@@ -133,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 20),
           _buildFeaturedGameCard(),
           const SizedBox(height: 20),
-          _buildImageSlider(),
+          _buildAnalysisButtons(), // Added here
           const SizedBox(height: 20),
         ],
       ),
@@ -144,8 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        primary: const Color.fromARGB(255, 18, 71, 33),
-        onPrimary: Colors.white,
+        foregroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 18, 71, 33),
         shape: const StadiumBorder(),
       ),
       child: Text(title),
@@ -189,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      primary: const Color.fromARGB(255, 18, 71, 33),
+                      backgroundColor: const Color.fromARGB(255, 18, 71, 33),
                       shape: const StadiumBorder(),
                     ),
                     child: const Text('Birds'),
@@ -221,60 +281,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildImageSlider() {
-    if (_imageUrls.isEmpty) {
-      return const Center(child: Text('No images found'));
-    }
-
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: 200.0,
-        autoPlay: true,
-        enlargeCenterPage: true,
-        aspectRatio: 16 / 9,
-        autoPlayInterval: const Duration(seconds: 3),
-        autoPlayAnimationDuration: const Duration(milliseconds: 800),
-        autoPlayCurve: Curves.fastOutSlowIn,
-      ),
-      items: _imageUrls.map((url) {
-        return Builder(
-          builder: (BuildContext context) {
-            return Container(
-              width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.symmetric(horizontal: 5.0),
-              decoration: const BoxDecoration(
-                color: Colors.amber,
-              ),
-              child: Image.network(
-                url,
-                fit: BoxFit.cover,
-                loadingBuilder: (BuildContext context, Widget child,
-                    ImageChunkEvent? loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  }
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (BuildContext context, Object exception,
-                    StackTrace? stackTrace) {
-                  print('Error loading image: $exception');
-                  return const Center(child: Icon(Icons.error));
-                },
-              ),
-            );
-          },
-        );
-      }).toList(),
-    );
-  }
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -288,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } else if (_role == 'admin') {
       if (index == 1) {
-        Navigator.pushNamed(context, '/admin');
+        Navigator.pushNamed(context, '/birda');
       } else if (index == 2) {
         Navigator.pushNamed(context, '/chat');
       } else if (index == 3) {
