@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class BirdScreen extends StatefulWidget {
   const BirdScreen({super.key});
@@ -19,6 +22,8 @@ class _BirdScreenState extends State<BirdScreen>
     {'name': 'Species 2', 'details': 'Details about Species 2'},
     {'name': 'Species 3', 'details': 'Details about Species 3'},
   ];
+  bool isUploadingImage = false;
+  bool isLoadingImages = true;
 
   @override
   void initState() {
@@ -28,27 +33,20 @@ class _BirdScreenState extends State<BirdScreen>
   }
 
   Future<void> fetchUnknownSpecies() async {
+    setState(() {
+      isLoadingImages = true;
+    });
+
     try {
       final response = await http.get(Uri.parse(
           'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/images/'));
 
       if (response.statusCode == 200) {
-        // Print the raw response body
-        print('Response body: ${response.body}');
-
         final List<dynamic> data = json.decode(response.body);
-
-        // Print the decoded data
-        print('Decoded data: $data');
-
-        // Map the base64 data to Uint8List and print to verify
         setState(() {
           unknownSpecies = data.map((item) {
-            // Assuming the base64 string is in the 'image' field
             final base64String = item['image'].split(',').last;
-            final imageBytes = base64Decode(base64String);
-            print('Image bytes length: ${imageBytes.length}');
-            return imageBytes;
+            return base64Decode(base64String);
           }).toList();
         });
       } else {
@@ -56,7 +54,83 @@ class _BirdScreenState extends State<BirdScreen>
       }
     } catch (e) {
       print('Error: $e');
-      throw Exception('Failed to fetch unknown species');
+      // Handle the error here
+    } finally {
+      setState(() {
+        isLoadingImages = false;
+      });
+    }
+  }
+
+  Future<void> shareImageToFacebook(Uint8List imageBytes) async {
+    setState(() {
+      isUploadingImage = true;
+    });
+
+    try {
+      final uri = Uri.parse(
+          'https://graph.facebook.com/401231743073984/photos'); // Replace with correct API version and endpoint
+      final accessToken =
+          'EAAP3BZAomIEsBOZBm07fQT4xxukvfZBBUBtSS7Snd7lAjqMdaWSxoAKIb4BaaAIflcHLjYPlRRvAHb8Kk1uqjPE7U5ZCad1bduKPSrqGOr5biwLmz9RJpoZC92vl8Ecd6MvSNSZAtUAQ0ZCgQ8mRFQpWiOnPnN4F6igGgPtKZCZBA7ZAT5sj5MJ2obIl4fb1ZC87Gtcs0uk3a8b8eZBecfqB'; // Replace with your actual Facebook access token
+
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add the access token
+      request.fields['access_token'] = accessToken;
+
+      // Add the message field
+      request.fields['message'] = 'Do you know this bird?';
+
+      // Add the image file as form data
+      request.files.add(http.MultipartFile.fromBytes(
+        'source', // Field name in the form
+        imageBytes, // Image bytes
+        filename: 'bird_image.png', // Filename to be used
+        contentType:
+            MediaType('image', 'png'), // Optional: Specify content type
+      ));
+
+      // Send the request
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: "Image uploaded successfully!",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      } else {
+        print('Failed to upload image. Status code: ${response.statusCode}');
+        print(response.reasonPhrase);
+        Fluttertoast.showToast(
+          msg: "Failed to upload image. Please try again.",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
+      Fluttertoast.showToast(
+        msg: "An error occurred. Please try again.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } finally {
+      setState(() {
+        isUploadingImage = false;
+      });
     }
   }
 
@@ -73,11 +147,9 @@ class _BirdScreenState extends State<BirdScreen>
               ElevatedButton.icon(
                 icon: const Icon(Icons.share),
                 label: const Text('Share on FB'),
-                onPressed: () {
-                  // Handle share functionality here
-                  // You might use a plugin like `share_plus` for actual sharing functionality
-
+                onPressed: () async {
                   Navigator.of(context).pop(); // Close the dialog
+                  await shareImageToFacebook(imageBytes);
                 },
               ),
             ],
@@ -94,48 +166,60 @@ class _BirdScreenState extends State<BirdScreen>
       appBar: AppBar(
         automaticallyImplyLeading: false, // Hide the back button
         backgroundColor:
-            Color.fromARGB(255, 17, 55, 13), // Change app bar color
+            const Color.fromARGB(255, 17, 55, 13), // Change app bar color
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            const Tab(text: 'Unknown Species'),
-            const Tab(text: 'Known Species'),
+          tabs: const [
+            Tab(text: 'Unknown Species'),
+            Tab(text: 'Known Species'),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Stack(
         children: [
-          unknownSpecies.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // 4 images per row
-                    crossAxisSpacing: 8.0, // Space between images horizontally
-                    mainAxisSpacing: 8.0, // Space between images vertically
-                  ),
-                  itemCount: unknownSpecies.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        _showImagePreview(unknownSpecies[index]);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Image.memory(unknownSpecies[index]),
+          AbsorbPointer(
+            absorbing: isUploadingImage || isLoadingImages,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                isLoadingImages
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4, // 4 images per row
+                          crossAxisSpacing:
+                              8.0, // Space between images horizontally
+                          mainAxisSpacing:
+                              8.0, // Space between images vertically
+                        ),
+                        itemCount: unknownSpecies.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              _showImagePreview(unknownSpecies[index]);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Image.memory(unknownSpecies[index]),
+                            ),
+                          );
+                        },
                       ),
+                ListView.builder(
+                  itemCount: knownSpecies.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(knownSpecies[index]['name']),
+                      subtitle: Text(knownSpecies[index]['details']),
                     );
                   },
                 ),
-          ListView.builder(
-            itemCount: knownSpecies.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(knownSpecies[index]['name']),
-                subtitle: Text(knownSpecies[index]['details']),
-              );
-            },
+              ],
+            ),
           ),
+          if (isUploadingImage)
+            const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

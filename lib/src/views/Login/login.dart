@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:wingspot/src/views/home.dart';
+import 'package:wingspot/src/views/Home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wingspot/src/views/register.dart';
+import 'package:wingspot/src/views/Register/register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -125,18 +125,19 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 10, 33, 17),
       body: Stack(
         children: [
           // Background image
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/register.jpg'), // Path to your background image
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          // Container(
+          //   decoration: const BoxDecoration(
+          //     image: DecorationImage(
+          //       image: AssetImage(
+          //           'assets/images/register.jpg'), // Path to your background image
+          //       fit: BoxFit.cover,
+          //     ),
+          //   ),
+          // ),
           // Login form
           Center(
             child: SingleChildScrollView(
@@ -144,13 +145,13 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 50), // Adjust the height as needed
+                  const SizedBox(height: 50), // Adjust the height as needed
                   Image.asset(
                     'assets/images/loginbird.gif', // Replace with your logo asset
                     height: 150,
                   ),
-                  SizedBox(height: 20),
-                  Text(
+                  const SizedBox(height: 20),
+                  const Text(
                     'Welcome Back!',
                     style: TextStyle(
                       fontSize: 24,
@@ -158,12 +159,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.white),
+                      labelStyle: const TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black.withOpacity(0.5),
                       border: OutlineInputBorder(
@@ -171,14 +172,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextField(
                     controller: _passwordController,
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      labelStyle: TextStyle(color: Colors.white),
+                      labelStyle: const TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black.withOpacity(0.5),
                       border: OutlineInputBorder(
@@ -187,9 +188,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     obscureText: true,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Checkbox(
@@ -202,29 +203,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         checkColor: Colors.white,
                         activeColor: Colors.blue,
                       ),
-                      Text(
+                      const Text(
                         'Remember Me',
                         style: TextStyle(color: Colors.white),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity, // Full width
                     height: 50, // Set the height as desired
                     child: ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(
+                        primary: const Color.fromARGB(
                             255, 28, 87, 2), // Set the background color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: Text('LOG IN'),
+                      child: const Text('LOG IN'),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
@@ -233,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const RegisterScreen()), // Replace with your register screen
                       );
                     },
-                    child: Text(
+                    child: const Text(
                       "DON'T HAVE AN ACCOUNT? SIGN UP",
                       style: TextStyle(color: Colors.white),
                     ),
