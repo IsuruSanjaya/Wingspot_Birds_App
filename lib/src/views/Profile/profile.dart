@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wingspot/src/views/login.dart';
-import 'package:wingspot/src/views/logintype.dart';
-import '../controllers/FirestoreService.dart'; // Adjust the import path as needed
-import '../controllers/AuthService.dart'; // Import your AuthService
+import 'package:wingspot/src/views/Login/login.dart';
+import '../../controllers/FirestoreService.dart'; // Adjust the import path as needed
+import '../../controllers/AuthService.dart'; // Import your AuthService
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);

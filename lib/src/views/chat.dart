@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:wingspot/src/views/home.dart';
+import 'package:wingspot/src/views/Home/home.dart';
 import '../models/message.dart';
 
 class ChatScreen extends StatefulWidget {

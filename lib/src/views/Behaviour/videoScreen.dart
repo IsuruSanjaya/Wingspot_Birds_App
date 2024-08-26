@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wingspot/src/views/Behaviour/audioScreen.dart';
 import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
-import 'package:wingspot/src/views/home.dart';
+import 'package:wingspot/src/views/Home/home.dart';
 
 class VideoScreen extends StatefulWidget {
   const VideoScreen({super.key});

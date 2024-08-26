@@ -191,6 +191,8 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:wingspot/src/views/Behaviour/audioScreen.dart';
+import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
 
 class AnalysisScreen extends StatefulWidget {
   const AnalysisScreen({super.key});
@@ -240,6 +242,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     return Scaffold(
       body: Column(
         children: [
+          SizedBox(
+            height: 75,
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -274,9 +279,10 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
   Widget _buildCard(Map<String, dynamic> bird) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.red, width: 2.0), // Red border
+        border: Border.all(
+            color: Color.fromARGB(255, 18, 71, 33), width: 2.0), // Red border
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Card(
@@ -312,18 +318,29 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildButton(
-                          Icons.video_file, 'Record Video', videoCount),
+                      _buildButton(Icons.video_file, 'Record Video', videoCount,
+                          () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => VideoScreen()),
+                        );
+                      }),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildButton(
-                          Icons.audio_file, 'Record Audio', audioCount),
+                      _buildButton(Icons.audio_file, 'Record Audio', audioCount,
+                          () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AudioScreen()),
+                        );
+                      }),
                     ],
                   ),
-                  // Add more rows if needed
                 ],
               ),
             ),
@@ -333,15 +350,14 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     );
   }
 
-  Widget _buildButton(IconData icon, String label, int count) {
+  Widget _buildButton(
+      IconData icon, String label, int count, VoidCallback onPressed) {
     return ElevatedButton.icon(
-      onPressed: () {
-        // Implement the functionality
-      },
+      onPressed: onPressed,
       icon: Icon(icon, color: Colors.white),
       label: Text('$label ($count)'),
       style: ElevatedButton.styleFrom(
-        primary: Colors.green, // Set button color to green
+        primary: Color.fromARGB(255, 22, 66, 23), // Set button color to green
         onPrimary: Colors.white, // Set text color
       ),
     );

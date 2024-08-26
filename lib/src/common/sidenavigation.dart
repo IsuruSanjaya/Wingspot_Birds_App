@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wingspot/src/views/Behaviour/audioScreen.dart';
 import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
-import 'package:wingspot/src/views/login.dart';
+import 'package:wingspot/src/views/Login/login.dart';
 
 class SideNavigation extends StatelessWidget {
   const SideNavigation({super.key});

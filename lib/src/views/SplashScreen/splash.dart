@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:wingspot/src/views/home.dart';
-import 'package:wingspot/src/views/login.dart';
-import 'package:wingspot/src/views/logintype.dart';
+import 'package:wingspot/src/views/Home/home.dart';
+import 'package:wingspot/src/views/Login/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

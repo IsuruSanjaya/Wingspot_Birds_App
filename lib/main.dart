@@ -5,13 +5,13 @@ import 'package:wingspot/src/views/Behaviour/audioScreen.dart';
 import 'package:wingspot/src/views/Behaviour/bDashboard.dart';
 import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
 import 'package:wingspot/src/views/Category/bird.dart';
+import 'package:wingspot/src/views/Lora/loraimage_view.dart';
 import 'package:wingspot/src/views/chat.dart';
-import 'package:wingspot/src/views/home.dart';
-import 'package:wingspot/src/views/login.dart';
-import 'package:wingspot/src/views/logintype.dart';
-import 'package:wingspot/src/views/profile.dart';
-import 'package:wingspot/src/views/register.dart';
-import 'package:wingspot/src/views/splash.dart';
+import 'package:wingspot/src/views/Home/home.dart';
+import 'package:wingspot/src/views/Login/login.dart';
+import 'package:wingspot/src/views/Profile/profile.dart';
+import 'package:wingspot/src/views/Register/register.dart';
+import 'package:wingspot/src/views/SplashScreen/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const AnalysisScreen(),
+      home: LoraImageView(),
       routes: {
         '/home': (context) =>
             HomeScreen(userId: FirebaseAuth.instance.currentUser?.uid),
@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const Profile(),
         '/login': (context) => const LoginScreen(),
         '/birda': (context) => const AudioScreen(),
+        '/birddash': (context) => const AnalysisScreen(),
       },
     );
   }
