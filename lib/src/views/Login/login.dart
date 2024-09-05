@@ -63,11 +63,11 @@ class _LoginScreenState extends State<LoginScreen> {
         fontSize: 16.0,
       );
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(userId: userId),
-        ),
-      );
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(
+      //     builder: (context) => HomeScreen(userId: userId),
+      //   ),
+      // );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         Fluttertoast.showToast(

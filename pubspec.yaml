@@ -51,6 +51,12 @@ dependencies:
   video_player: ^2.7.2
   flutter_vlc_player: ^7.2.0
   ffmpeg_kit_flutter: ^6.0.3
+  video_thumbnail: ^0.5.3
+  device_preview: ^1.1.0
+  flutter_blue_plus: ^1.32.12
+  flutter_bluetooth_serial: ^0.4.0
+  get: ^4.6.5
+  table_calendar: ^3.0.8
 
 
 

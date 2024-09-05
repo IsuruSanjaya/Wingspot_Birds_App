@@ -47,13 +47,13 @@ class _AudioScreenState extends State<AudioScreen>
         MaterialPageRoute(builder: (context) => const VideoScreen()),
       );
     } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const HomeScreen(
-                  userId: '',
-                )),
-      );
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(
+      //       builder: (context) => const HomeScreen(
+      //             userId: '',
+      //           )),
+      // );
     }
   }
 
