@@ -33,10 +33,10 @@ class _SplashScreenState extends State<SplashScreen> {
       );
     } else {
       // Navigate to login screen after 5 seconds if internet is connected
-      Timer(Duration(seconds: 5), () {
+      Timer(const Duration(seconds: 5), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       });
     }
@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Loader
-              CircularProgressIndicator(
+              const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ],

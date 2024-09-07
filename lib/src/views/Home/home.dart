@@ -1,11 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String? userId;
-
-  const HomeScreen({Key? key, required this.userId}) : super(key: key);
+  const HomeScreen(
+      {Key? key,
+      required String name,
+      required Uint8List image,
+      required String mobile,
+      required email})
+      : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -154,11 +160,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Spacer(),
-                const CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/hb.png'),
-                  radius: 25,
-                ),
+                // const Spacer(),
+                // const CircleAvatar(
+                //   backgroundImage: AssetImage('assets/images/dove.png'),
+                //   radius: 25,
+                // ),
               ],
             ),
           ),
@@ -251,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (index == 3) {
       Navigator.pushNamed(context, '/lora');
     } else if (index == 4) {
-      Navigator.pushNamed(context, '/profile', arguments: widget.userId);
+      Navigator.pushNamed(context, '/profile');
     }
   }
 

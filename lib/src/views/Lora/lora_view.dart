@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoraViewLogs extends StatefulWidget {
   const LoraViewLogs({Key? key}) : super(key: key);
@@ -13,6 +15,9 @@ class _LoraViewLogsState extends State<LoraViewLogs> {
   BluetoothDevice? connectedDevice;
   BluetoothConnection? connection;
   List<BluetoothDevice> pairedDevices = [];
+
+  final String apiUrl =
+      'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/api/lora/create'; // Replace with your API URL
 
   @override
   void initState() {
@@ -73,7 +78,35 @@ class _LoraViewLogsState extends State<LoraViewLogs> {
         "time": DateTime.now().toLocal().toString().split(' ')[1],
         "details": message.trim()
       });
+
+      // Save the log to the database if it contains "Bird Detected"
+      if (message.contains("Bird Detected")) {
+        saveLogToDatabase(message.trim());
+      }
     });
+  }
+
+  Future<void> saveLogToDatabase(String message) async {
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'time': DateTime.now().toLocal().toString(),
+          'detail': message,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Log saved successfully.');
+      } else {
+        print('Failed to save log. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error saving log to database: $e');
+    }
   }
 
   void showDeviceSelectionDialog() {

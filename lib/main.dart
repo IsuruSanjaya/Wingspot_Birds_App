@@ -37,12 +37,10 @@ class MyApp extends StatelessWidget {
           true, // Add this line to use the media query from DevicePreview
       locale: DevicePreview.locale(
           context), // Add this line to get locale from DevicePreview
-      home: const HomeScreen(
-        userId: '',
-      ),
+      home: const SplashScreen(),
       routes: {
         // '/home': (context) =>
-        // HomeScreen(userId: FirebaseAuth.instance.currentUser?.uid),
+        // const HomeScreen(email: '', mobile: '', name: '', image: null,),
         '/chat': (context) => const BirdScreen(),
         '/profile': (context) => const Profile(),
         '/login': (context) => const LoginScreen(),

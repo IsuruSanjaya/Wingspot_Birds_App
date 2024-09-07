@@ -191,7 +191,7 @@ class _LoraHistoryViewState extends State<LoraHistoryView> {
                                   color: const Color.fromARGB(255, 13, 58, 6),
                                 ),
                                 title: Text(
-                                  "Detail: ${log['logmessage']}",
+                                  "Detail: ${log['detail']}",
                                   style: textStyle,
                                 ),
                                 subtitle: Column(

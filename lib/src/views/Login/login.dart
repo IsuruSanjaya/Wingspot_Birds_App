@@ -1,8 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:wingspot/src/views/Home/home.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wingspot/src/views/Home/home.dart';
 import 'package:wingspot/src/views/Register/register.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      // Show error message
       Fluttertoast.showToast(
         msg: 'Please fill all the fields',
         toastLength: Toast.LENGTH_SHORT,
@@ -42,63 +43,75 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
     });
+
+    final url = Uri.parse(
+        'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/login/login/new');
+
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      final response = await http.post(
+        url,
+        body: {
+          'emailOrUsername': _emailController.text.trim(),
+          'password': _passwordController.text.trim(),
+        },
       );
 
-      String userId = userCredential.user?.uid ?? '';
-      // Save the userId in SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userId', userId);
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
 
-      Fluttertoast.showToast(
-        msg: "Sign in successful",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+        if (jsonResponse['message'] == 'Login successful') {
+          final user = jsonResponse['user'];
+          // String userId = user['_id'];
+          String name = user['name'];
+          String base64Image = user['image'] ?? ''; // Handle missing image
+          String email = user['email'] ?? ''; // Handle missing image
+          String mobile = user['mobile'] ?? ''; // Handle missing image
 
-      // Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(
-      //     builder: (context) => HomeScreen(userId: userId),
-      //   ),
-      // );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        Fluttertoast.showToast(
-          msg: "No user found for that email.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      } else if (e.code == 'wrong-password') {
-        Fluttertoast.showToast(
-          msg: "Wrong password provided.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      } else if (e.code == 'network-request-failed') {
-        Fluttertoast.showToast(
-          msg: "Network error. Please check your internet connection.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
+          // Save user ID in SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          // await prefs.setString('userId', userId);
+
+          // Decode base64 image
+          Uint8List decodedImage;
+          try {
+            decodedImage = base64Decode(base64Image);
+          } catch (e) {
+            // Handle decoding error, set a placeholder or null if image is invalid
+            decodedImage = Uint8List(0); // or use a default image
+          }
+
+          Fluttertoast.showToast(
+            msg: "Login successful",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+
+          // Navigate to the HomeScreen, passing name and image
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                  name: name,
+                  image: decodedImage,
+                  email: email,
+                  mobile: mobile),
+            ),
+          );
+        } else {
+          Fluttertoast.showToast(
+            msg: jsonResponse['message'] ?? "Login failed. Please try again.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
       } else {
         Fluttertoast.showToast(
-          msg: "Please entered the details",
+          msg: "Server error: ${response.statusCode}. Please try again later.",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
@@ -107,8 +120,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
+      print('Error during login: $e');
       Fluttertoast.showToast(
-        msg: "An error occurred. Please try again.",
+        msg: "An error occurred: $e. Please check your internet connection.",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
@@ -125,29 +139,18 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 10, 33, 17),
+      backgroundColor: const Color.fromARGB(255, 10, 33, 17),
       body: Stack(
         children: [
-          // Background image
-          // Container(
-          //   decoration: const BoxDecoration(
-          //     image: DecorationImage(
-          //       image: AssetImage(
-          //           'assets/images/register.jpg'), // Path to your background image
-          //       fit: BoxFit.cover,
-          //     ),
-          //   ),
-          // ),
-          // Login form
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(30.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 50), // Adjust the height as needed
+                  const SizedBox(height: 50),
                   Image.asset(
-                    'assets/images/loginbird.gif', // Replace with your logo asset
+                    'assets/images/loginbird.gif',
                     height: 150,
                   ),
                   const SizedBox(height: 20),
@@ -211,13 +214,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
-                    width: double.infinity, // Full width
-                    height: 50, // Set the height as desired
+                    width: double.infinity,
+                    height: 50,
                     child: ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        primary: const Color.fromARGB(
-                            255, 28, 87, 2), // Set the background color
+                        primary: const Color.fromARGB(255, 28, 87, 2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -230,8 +232,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                            builder: (context) =>
-                                const RegisterScreen()), // Replace with your register screen
+                          builder: (context) => const RegisterScreen(),
+                        ),
                       );
                     },
                     child: const Text(
@@ -243,9 +245,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          if (_isLoading) // Show loader if isLoading is true
+          if (_isLoading)
             Container(
-              color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
+              color: Colors.white.withOpacity(0.5),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
