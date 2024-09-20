@@ -2,16 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wingspot/src/views/Home/home.dart';
 import 'package:wingspot/src/views/Login/login.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 class RegisterScreen extends StatefulWidget {
@@ -28,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
 
-  File? _image, profileImg;
+  File? _image;
   String? profileImgBase64;
 
   bool _isLoading = false; // Track loading state
@@ -44,28 +38,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    // Set loading state to true
-
     final String name = _nameController.text.trim();
     final String mobileNo = _mobileNoController.text.trim();
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
     final String username = _usernameController.text.trim();
 
-    // Check if any field is empty
     if (name.isEmpty ||
         mobileNo.isEmpty ||
         email.isEmpty ||
         password.isEmpty ||
         username.isEmpty) {
-      // Show error message
       Fluttertoast.showToast(
         msg: 'Please fill all the fields',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0,
       );
       return;
     }
@@ -75,82 +62,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      String? imageUrl;
-
+      // Convert image to base64 if available
+      String base64Image = '';
       if (_image != null) {
-        // Upload image to Firebase Storage
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('user_images')
-            .child('${userCredential.user!.uid}.jpg');
-        await storageRef.putFile(_image!);
-
-        // Get download URL of the uploaded image
-        imageUrl = await storageRef.getDownloadURL();
+        List<int> imageBytes = await _image!.readAsBytes();
+        base64Image = base64Encode(imageBytes);
       }
 
-      // Save user data to Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set({
-        'name': name,
-        'mobileNo': mobileNo,
-        'email': email,
+      // Prepare the JSON payload
+      final body = jsonEncode({
         'username': username,
-        // 'evidence': profileImg,
-        'imageUrl': imageUrl, // Store the download URL
-        'flag': 0,
-        'role': 'user' // Add the flag field
-        // Add other fields here
+        'password': password,
+        'name': name,
+        'mobile': mobileNo,
+        'email': email,
+        // 'image':
+        //     base64Image, // Image is optional; send an empty string if not available
       });
 
-      // Call additional API to save user data to MongoDB
+      // Send POST request
       final response = await http.post(
-        Uri.parse(
-            'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/requests/create/req'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'name': name,
-          'mobile': mobileNo,
-          'email': email,
-          'username': username,
-          'image': imageUrl ?? '',
-          'flag': '0',
-          'password': password,
-        }),
+        Uri.parse('http://52.220.37.106:8090/login/create/new'),
+        headers: {'Content-Type': 'application/json'},
+        body: body, // JSON body
       );
 
-      // Show success message
-      Fluttertoast.showToast(
-        msg: 'Registration successful',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-
-      // Navigate to home screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      // Handle response
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: 'Registration successful',
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()));
+      } else {
+        final decodedResponse = jsonDecode(response.body);
+        Fluttertoast.showToast(
+          msg: 'Registration failed',
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
     } catch (e) {
-      // Show error message
       Fluttertoast.showToast(
-        msg: 'Registration failed',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        msg: 'An error occurred',
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0,
       );
     } finally {
-      // Set loading state to false after registration process is completed
       setState(() {
         _isLoading = false;
       });
@@ -171,11 +131,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           ),
-          // Transparent overlay
-          // Container(
-          //   color:
-          //       Colors.white.withOpacity(0.5), // Semi-transparent white color
-          // ),
           Center(
             child: AbsorbPointer(
               absorbing: _isLoading, // Disable screen interaction while loading
@@ -259,23 +214,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: const OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      // profileImg == null
-                      //     ? SizedBox(
-                      //         width: double.infinity, // Make button full width
-                      //         child: ElevatedButton(
-                      //           onPressed: _getPImage,
-                      //           style: ElevatedButton.styleFrom(
-                      //             primary: Color.fromARGB(
-                      //                 255, 231, 44, 44), // Light green color
-                      //           ),
-                      //           child: Text('NIC Image'),
-                      //         ),
-                      //       )
-                      //     : Image.file(
-                      //         profileImg!,
-                      //         height: 100,
-                      //       ),
                       const SizedBox(height: 40),
                       SizedBox(
                         width: double.infinity,
@@ -295,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const LoginScreen()), // Replace with your register screen
+                                    const LoginScreen()), // Replace with your login screen
                           );
                         },
                         child: Text(

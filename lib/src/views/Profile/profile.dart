@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wingspot/src/views/Login/login.dart';
-import '../../controllers/FirestoreService.dart'; // Adjust the import path as needed
-import '../../controllers/AuthService.dart'; // Import your AuthService
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -13,57 +10,51 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final FirestoreService _firestoreService = FirestoreService();
-  final AuthService _authService = AuthService(); // Instantiate AuthService
   Map<String, dynamic>? userData;
-  late String userId; // Declare userId variable
+  String? _email;
+  String? _mobileNo;
+  String _userName = '';
+  String _userImageUrl = 'assets/images/hbird.png'; // Default profile image
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _getUserId().then((id) {
-      if (id != null) {
-        setState(() {
-          userId = id;
-        });
-        _loadUserData(userId);
-      } else {
-        // Handle the case when userId is not available
-        print("User ID is not available.");
-      }
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _mobileNo = prefs.getString('mobile');
+      _email = prefs.getString('email');
+      _userName = prefs.getString('name') ?? 'Guest';
+      _userImageUrl =
+          prefs.getString('userImageUrl') ?? 'assets/images/hbird.png';
+
+      // Populate userData map with values from SharedPreferences
+      userData = {
+        'username': _userName,
+        'email': _email,
+        'mobileNo': _mobileNo,
+        '_userImageUrl': _userImageUrl,
+      };
     });
   }
 
-  Future<void> _loadUserData(String userId) async {
-    try {
-      Map<String, dynamic>? data = await _firestoreService.getUserData(userId);
-      setState(() {
-        userData = data;
-      });
-    } catch (e) {
-      print("Error loading user data: $e");
-      // Handle error as needed (e.g., show error message)
-    }
-  }
-
-  Future<String?> _getUserId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userId');
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
   }
 
   Future<void> _logout() async {
     try {
-      await _authService.logout();
+      // Assuming _authService.logout() is defined somewhere
       // Clear the saved userId from shared preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('userId');
+      await prefs.remove('name');
+      await prefs.remove('email');
+      await prefs.remove('mobile');
 
       // Navigate to login screen after logout
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              const LoginScreen(), // Replace with your login screen widget
+          builder: (context) => const LoginScreen(),
         ),
       );
     } catch (e) {
@@ -88,13 +79,14 @@ class _ProfileState extends State<Profile> {
             : ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  // Add space between the top and the profile image
-                  const SizedBox(height: 80), // Adjust the height as needed
+                  const SizedBox(
+                      height:
+                          80), // Space between the top and the profile image
 
                   Center(
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundImage: NetworkImage(userData!['imageUrl']),
+                      backgroundImage: AssetImage(userData!['_userImageUrl']),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -114,11 +106,11 @@ class _ProfileState extends State<Profile> {
                     child: ListTile(
                       leading: Image.asset(
                         'assets/images/user.png', // Replace with your image asset path
-                        width: 28, // Adjust width as needed
-                        height: 28, // Adjust height as needed
+                        width: 28,
+                        height: 28,
                       ),
                       title: const Text('Name'),
-                      subtitle: Text(userData!['name']),
+                      subtitle: Text(userData!['username']),
                     ),
                   ),
                   Card(
@@ -126,11 +118,11 @@ class _ProfileState extends State<Profile> {
                     child: ListTile(
                       leading: Image.asset(
                         'assets/images/gmail.png', // Replace with your image asset path
-                        width: 24, // Adjust width as needed
-                        height: 24, // Adjust height as needed
+                        width: 24,
+                        height: 24,
                       ),
                       title: const Text('Email'),
-                      subtitle: Text(userData!['email']),
+                      subtitle: Text(userData!['email'] ?? 'N/A'),
                     ),
                   ),
                   Card(
@@ -138,11 +130,11 @@ class _ProfileState extends State<Profile> {
                     child: ListTile(
                       leading: Image.asset(
                         'assets/images/phone-call.png', // Replace with your image asset path
-                        width: 24, // Adjust width as needed
-                        height: 24, // Adjust height as needed
+                        width: 24,
+                        height: 24,
                       ),
                       title: const Text('Mobile'),
-                      subtitle: Text(userData!['mobileNo']),
+                      subtitle: Text(userData!['mobileNo'] ?? 'N/A'),
                     ),
                   ),
                   const SizedBox(height: 80),

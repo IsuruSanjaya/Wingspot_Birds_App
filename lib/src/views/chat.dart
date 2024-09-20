@@ -198,12 +198,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen(
-                                  userId: '',
-                                )), // Replace with your home screen
-                      );
+                      // Navigator.of(context).pushReplacement(
+                      //   MaterialPageRoute(
+                      //       builder: (context) => const HomeScreen(
+                      //             userId: '',
+                      //           )), // Replace with your home screen
+                      // );
                     },
                   ),
                   const SizedBox(width: 10),
