@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +7,7 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
 
 class LoraImageView extends StatefulWidget {
   const LoraImageView({super.key});
@@ -21,7 +21,7 @@ class _LoraImageViewState extends State<LoraImageView> {
   List<String> videoUrls = [];
   bool isLoading = true;
 
-  late VlcPlayerController _videoPlayerController;
+  VlcPlayerController? _videoPlayerController; // Changed to nullable
   String? _currentlyPlayingVideo;
 
   @override
@@ -32,14 +32,15 @@ class _LoraImageViewState extends State<LoraImageView> {
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
+    // Ensure the controller is disposed of only if it's initialized
+    _videoPlayerController?.dispose();
     super.dispose();
   }
 
   Future<void> fetchData() async {
     try {
-      final response = await http.get(Uri.parse(
-          'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/api/lora/images/all'));
+      final response = await http
+          .get(Uri.parse('http://52.220.37.106:8090/api/lora/images/all'));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
@@ -90,7 +91,6 @@ class _LoraImageViewState extends State<LoraImageView> {
         final ffmpegResponse =
             await FFmpegKit.execute('-i $h264Path -c:v copy $mp4Path');
 
-        // Debug print to check if the conversion was successful
         if (await File(mp4Path).exists()) {
           print('MP4 conversion successful: $mp4Path');
         } else {
@@ -99,7 +99,6 @@ class _LoraImageViewState extends State<LoraImageView> {
 
         setState(() {
           videoUrls.add(mp4Path); // Add the path of the converted video
-          print('Video URLs: $videoUrls'); // Debug print
         });
 
         // Optionally, delete the .h264 file after conversion
@@ -119,7 +118,6 @@ class _LoraImageViewState extends State<LoraImageView> {
         maxHeight: 150,
         quality: 75,
       );
-      print('Thumbnail generated at: $thumbnailPath'); // Debug print
       return thumbnailPath!;
     } catch (e) {
       print('Error generating thumbnail: $e');
@@ -129,9 +127,80 @@ class _LoraImageViewState extends State<LoraImageView> {
 
   void closePreview() {
     setState(() {
-      _videoPlayerController.stop();
+      if (_videoPlayerController != null) {
+        _videoPlayerController!.stop();
+        _videoPlayerController!.dispose();
+      }
       _currentlyPlayingVideo = null;
+      _videoPlayerController = null;
     });
+  }
+
+  Future<void> analyzeVideo(String videoPath) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://52.220.37.106:5000/api/v1/model/predict'),
+      );
+      request.files.add(await http.MultipartFile.fromPath('file', videoPath));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseData = await response.stream.bytesToString();
+        var jsonResponse = json.decode(responseData);
+
+        String prediction = jsonResponse['prediction'];
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Video Analysis Result'),
+            content: Text('Prediction: $prediction'),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await savePredictionToDatabase(videoPath, prediction);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const VideoScreen(),
+                    ),
+                  );
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        print('Failed to analyze video');
+      }
+    } catch (e) {
+      print('Error analyzing video: $e');
+    }
+  }
+
+  Future<void> savePredictionToDatabase(
+      String videoPath, String prediction) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://52.220.37.106:8090/api/videos/upload-video'),
+      );
+
+      request.files.add(await http.MultipartFile.fromPath('video', videoPath));
+      request.fields['description'] = prediction;
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        print('Prediction and video saved to database');
+      } else {
+        print('Failed to save prediction and video');
+      }
+    } catch (e) {
+      print('Error saving prediction and video: $e');
+    }
   }
 
   @override
@@ -153,12 +222,13 @@ class _LoraImageViewState extends State<LoraImageView> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  if (_currentlyPlayingVideo != null)
+                  if (_currentlyPlayingVideo != null &&
+                      _videoPlayerController != null)
                     Stack(
                       children: [
                         Expanded(
                           child: VlcPlayer(
-                            controller: _videoPlayerController,
+                            controller: _videoPlayerController!,
                             aspectRatio: 16 / 9,
                             placeholder: const Center(
                                 child: CircularProgressIndicator()),
@@ -196,7 +266,7 @@ class _LoraImageViewState extends State<LoraImageView> {
     return GridView.builder(
       padding: const EdgeInsets.all(10.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Number of columns
+        crossAxisCount: 2,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
       ),
@@ -219,7 +289,7 @@ class _LoraImageViewState extends State<LoraImageView> {
     return GridView.builder(
       padding: const EdgeInsets.all(10.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Number of columns
+        crossAxisCount: 2,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
       ),
@@ -231,35 +301,36 @@ class _LoraImageViewState extends State<LoraImageView> {
             if (snapshot.connectionState == ConnectionState.done &&
                 snapshot.hasData) {
               return GestureDetector(
-                onTap: () {
+                onTap: () async {
+                  // Ensure video player controller is disposed before initializing a new one
+                  _videoPlayerController?.dispose();
+
                   setState(() {
                     _currentlyPlayingVideo = videoUrls[index];
-                    if (File(_currentlyPlayingVideo!).existsSync()) {
-                      print('Playing video: $_currentlyPlayingVideo');
-                      _videoPlayerController = VlcPlayerController.file(
-                        File(_currentlyPlayingVideo!),
-                        hwAcc: HwAcc.full,
-                        autoPlay: true,
-                      );
-                    } else {
-                      print(
-                          'Video file does not exist at path: $_currentlyPlayingVideo');
-                    }
+                    _videoPlayerController = VlcPlayerController.file(
+                      File(videoUrls[index]),
+                      autoPlay: true,
+                      options: VlcPlayerOptions(),
+                    );
                   });
+
+                  // After playing, call analyzeVideo
+                  await analyzeVideo(videoUrls[index]);
                 },
                 child: Stack(
-                  alignment: Alignment.center,
                   children: [
                     Image.file(
                       File(snapshot.data!),
                       fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
                     ),
-                    const Icon(
-                      Icons.play_circle_outline,
-                      color: Colors.white,
-                      size: 50.0,
+                    const Positioned(
+                      bottom: 8.0,
+                      right: 8.0,
+                      child: Icon(
+                        Icons.play_circle_fill,
+                        color: Colors.white,
+                        size: 30.0,
+                      ),
                     ),
                   ],
                 ),

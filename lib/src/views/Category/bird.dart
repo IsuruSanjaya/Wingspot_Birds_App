@@ -38,8 +38,8 @@ class _BirdScreenState extends State<BirdScreen>
     });
 
     try {
-      final response = await http.get(Uri.parse(
-          'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/images/'));
+      final response =
+          await http.get(Uri.parse('http://52.220.37.106:8090/images/'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -164,7 +164,7 @@ class _BirdScreenState extends State<BirdScreen>
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Hide the back button
+        title: const Text('Species'),
         backgroundColor:
             const Color.fromARGB(255, 17, 55, 13), // Change app bar color
         bottom: TabBar(

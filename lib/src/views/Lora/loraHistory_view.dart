@@ -23,7 +23,7 @@ class _LoraHistoryViewState extends State<LoraHistoryView> {
 
   Future<void> _fetchLogs() async {
     const String apiUrl =
-        'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/api/lora/all';
+        'http://52.220.37.106:8090/api/lora/all';
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {

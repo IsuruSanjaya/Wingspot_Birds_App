@@ -44,8 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    final url = Uri.parse(
-        'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/login/login/new');
+    final url = Uri.parse('http://52.220.37.106:8090/login/login/new');
 
     try {
       final response = await http.post(
@@ -69,7 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
           // Save user ID in SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          // await prefs.setString('userId', userId);
+          await prefs.setString('name', name);
+          await prefs.setString('email', email);
+          await prefs.setString('mobile', mobile);
 
           // Decode base64 image
           Uint8List decodedImage;
@@ -111,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         Fluttertoast.showToast(
-          msg: "Server error: ${response.statusCode}. Please try again later.",
+          msg: "Username and password incorrect",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,

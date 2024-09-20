@@ -24,10 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
     'https://example.com/image2.jpg',
     'https://example.com/image3.jpg',
   ]; // Hardcoded image URLs
-  String? _userId;
-  String? _role;
+  String? _email;
+  String? _mobileNo;
 
-  String _userName = 'John Doe'; // Hardcoded username
+  String _userName = '';
   String _userImageUrl = 'assets/images/hbird.png'; // Hardcoded profile image
 
   @override
@@ -39,8 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _userId = prefs.getString('userId');
-      _role = prefs.getString('role');
+      _mobileNo = prefs.getString('mobile');
+      _email = prefs.getString('email');
+      _userName = prefs.getString('name') ?? 'Guest'; // Load the user's name
     });
   }
 
@@ -160,11 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // const Spacer(),
-                // const CircleAvatar(
-                //   backgroundImage: AssetImage('assets/images/dove.png'),
-                //   radius: 25,
-                // ),
               ],
             ),
           ),
@@ -191,22 +187,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Stack(
               children: [
-                Image.network(
-                  'https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcRy1-sy_4UzjKSwnTP8y2Lp_vVtcnGRvu4nEaNUuv0dgHSTZdvjg2vmqKpTk94HWPxmpjHiATjcLIae9F0qYU08OObujZDcBVv263MWZQN4U6uJ3LAUqujMDiKPhqfOBAz9Pb_6-o4R',
+                Image.asset(
+                  'assets/images/red2.png',
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                ),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Row(
-                    children: const [
-                      Icon(Icons.apple, color: Colors.white),
-                      SizedBox(width: 5),
-                      Icon(Icons.android, color: Colors.white),
-                    ],
-                  ),
                 ),
                 Positioned(
                   bottom: 10,
@@ -225,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Horizon Zero Dawn',
+                'Red Wattled Lapwing',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -235,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'Recommended because you played games tagged with...',
+                'The red-wattled lapwing is an Asian lapwing or large plover, a wader in the family Charadriidae.',
                 style: TextStyle(color: Colors.grey),
               ),
             ),
@@ -251,12 +236,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
     if (index == 1) {
-      Navigator.pushNamed(context, '/birda');
-    } else if (index == 2) {
       Navigator.pushNamed(context, '/chat');
-    } else if (index == 3) {
+    } else if (index == 2) {
       Navigator.pushNamed(context, '/lora');
-    } else if (index == 4) {
+    } else if (index == 3) {
       Navigator.pushNamed(context, '/profile');
     }
   }
@@ -268,7 +251,6 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
-        role: _role,
       ),
     );
   }
@@ -277,13 +259,11 @@ class _HomeScreenState extends State<HomeScreen> {
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
-  final String? role;
 
   const CustomBottomNavigationBar({
     Key? key,
     required this.selectedIndex,
     required this.onItemTapped,
-    required this.role,
   }) : super(key: key);
 
   @override
@@ -293,10 +273,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Icon(Icons.home),
         label: 'Home',
       ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.admin_panel_settings),
-        label: 'Admin',
-      ),
+      // const BottomNavigationBarItem(
+      //   icon: Icon(Icons.admin_panel_settings),
+      //   label: 'Admin',
+      // ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.comment),
         label: 'Community',

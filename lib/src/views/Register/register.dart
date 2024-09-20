@@ -82,8 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Send POST request
       final response = await http.post(
-        Uri.parse(
-            'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/login/create/new'),
+        Uri.parse('http://52.220.37.106:8090/login/create/new'),
         headers: {'Content-Type': 'application/json'},
         body: body, // JSON body
       );
@@ -100,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else {
         final decodedResponse = jsonDecode(response.body);
         Fluttertoast.showToast(
-          msg: decodedResponse['message'] ?? 'Registration failed',
+          msg: 'Registration failed',
           backgroundColor: Colors.red,
           textColor: Colors.white,
         );

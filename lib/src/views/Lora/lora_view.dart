@@ -17,7 +17,7 @@ class _LoraViewLogsState extends State<LoraViewLogs> {
   List<BluetoothDevice> pairedDevices = [];
 
   final String apiUrl =
-      'https://wingspotbackend-dzc0anehbyfzg7a9.eastus-01.azurewebsites.net/api/lora/create'; // Replace with your API URL
+      'http://52.220.37.106:8090/api/lora/create'; // Replace with your API URL
 
   @override
   void initState() {
