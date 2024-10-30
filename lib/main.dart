@@ -5,6 +5,9 @@ import 'package:wingspot/src/views/Behaviour/audioScreen.dart';
 import 'package:wingspot/src/views/Behaviour/bDashboard.dart';
 import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
 import 'package:wingspot/src/views/Category/bird.dart';
+import 'package:wingspot/src/views/Category/speciesIdentify.dart';
+import 'package:wingspot/src/views/EggAnalysis/DetectView.dart';
+import 'package:wingspot/src/views/EggAnalysis/resultJsonView.dart';
 import 'package:wingspot/src/views/Lora/loraHistory_view.dart';
 import 'package:wingspot/src/views/Lora/lora_view.dart';
 import 'package:wingspot/src/views/Lora/loraimage_view.dart';
@@ -37,11 +40,20 @@ class MyApp extends StatelessWidget {
           true, // Add this line to use the media query from DevicePreview
       locale: DevicePreview.locale(
           context), // Add this line to get locale from DevicePreview
-      home: const SplashScreen(),
+      home: const HomeScreen(
+        email: null,
+        mobile: '',
+        name: '',
+      ),
       routes: {
         // '/home': (context) =>
         // const HomeScreen(email: '', mobile: '', name: '', image: null,),
         '/chat': (context) => const BirdScreen(),
+        '/egg': (context) => const DetectView(),
+        '/success': (context) => const ResultJsonView(),
+        '/birdanalysis': (context) => const BirdAnalysis(),
+        '/birdspecies': (context) => const SpeciesIdentify(),
+
         '/profile': (context) => const Profile(),
         '/login': (context) => const LoginScreen(),
         '/birda': (context) => const VideoScreen(),

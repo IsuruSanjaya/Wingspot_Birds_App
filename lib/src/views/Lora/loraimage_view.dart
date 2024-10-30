@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -7,7 +9,8 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:wingspot/src/views/Behaviour/videoScreen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 class LoraImageView extends StatefulWidget {
   const LoraImageView({super.key});
@@ -21,7 +24,7 @@ class _LoraImageViewState extends State<LoraImageView> {
   List<String> videoUrls = [];
   bool isLoading = true;
 
-  VlcPlayerController? _videoPlayerController; // Changed to nullable
+  VlcPlayerController? _videoPlayerController;
   String? _currentlyPlayingVideo;
 
   @override
@@ -32,7 +35,6 @@ class _LoraImageViewState extends State<LoraImageView> {
 
   @override
   void dispose() {
-    // Ensure the controller is disposed of only if it's initialized
     _videoPlayerController?.dispose();
     super.dispose();
   }
@@ -40,7 +42,7 @@ class _LoraImageViewState extends State<LoraImageView> {
   Future<void> fetchData() async {
     try {
       final response = await http
-          .get(Uri.parse('http://52.220.37.106:8090/api/lora/images/all'));
+          .get(Uri.parse('http://52.220.106.102:8090/api/lora/images/all'));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
@@ -54,7 +56,6 @@ class _LoraImageViewState extends State<LoraImageView> {
               .toList();
         });
 
-        // Process video files
         for (var item in data) {
           if (item['key'].toString().endsWith('.h264') ||
               item['key'].toString().endsWith('.mp4')) {
@@ -81,13 +82,11 @@ class _LoraImageViewState extends State<LoraImageView> {
       final mp4Path = path.join(
           directory.path, '${path.basenameWithoutExtension(h264Path)}.mp4');
 
-      // Download the .h264 file
       final response = await http.get(Uri.parse(videoUrl));
       if (response.statusCode == 200) {
         final file = File(h264Path);
         await file.writeAsBytes(response.bodyBytes);
 
-        // Convert the .h264 file to .mp4 using ffmpeg
         final ffmpegResponse =
             await FFmpegKit.execute('-i $h264Path -c:v copy $mp4Path');
 
@@ -98,30 +97,13 @@ class _LoraImageViewState extends State<LoraImageView> {
         }
 
         setState(() {
-          videoUrls.add(mp4Path); // Add the path of the converted video
+          videoUrls.add(mp4Path);
         });
 
-        // Optionally, delete the .h264 file after conversion
         await file.delete();
       }
     } catch (e) {
       print('Error downloading or converting video: $e');
-    }
-  }
-
-  Future<String> getVideoThumbnail(String videoPath) async {
-    try {
-      final thumbnailPath = await VideoThumbnail.thumbnailFile(
-        video: videoPath,
-        thumbnailPath: (await getTemporaryDirectory()).path,
-        imageFormat: ImageFormat.JPEG,
-        maxHeight: 150,
-        quality: 75,
-      );
-      return thumbnailPath!;
-    } catch (e) {
-      print('Error generating thumbnail: $e');
-      return '';
     }
   }
 
@@ -136,36 +118,96 @@ class _LoraImageViewState extends State<LoraImageView> {
     });
   }
 
-  Future<void> analyzeVideo(String videoPath) async {
+  Future<void> downloadFile(String url) async {
     try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final status = await Permission.storage.request();
+        if (status.isGranted) {
+          final result = await ImageGallerySaver.saveImage(
+            Uint8List.fromList(response.bodyBytes),
+            quality: 100,
+            name: path.basename(url),
+          );
+          print('File downloaded and saved to gallery: $result');
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Download Complete'),
+              content: Text('Image saved to gallery.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          print('Permission denied');
+        }
+      } else {
+        print('Failed to download file: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error downloading file: $e');
+    }
+  }
+
+  Future<void> identifySpecies(String imageUrl) async {
+    try {
+      // Download the image from the URL
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode != 200) {
+        print('Failed to download image: ${response.reasonPhrase}');
+        return;
+      }
+
+      // Create a multipart request
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://52.220.37.106:5000/api/v1/model/predict'),
+        Uri.parse(
+            'http://wsflaskapploadbalancer-1950839340.us-east-1.elb.amazonaws.com/detect_bird_category'),
       );
-      request.files.add(await http.MultipartFile.fromPath('file', videoPath));
 
-      var response = await request.send();
+      // Add the image file to the request
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image', // This is the key your API expects
+          response.bodyBytes,
+          filename:
+              'bird_image.jpg', // You can use a dynamic name or keep it static
+        ),
+      );
 
-      if (response.statusCode == 200) {
-        var responseData = await response.stream.bytesToString();
-        var jsonResponse = json.decode(responseData);
+      // Send the request
+      var streamedResponse = await request.send();
 
-        String prediction = jsonResponse['prediction'];
+      // Handle the response
+      if (streamedResponse.statusCode == 200) {
+        // Convert the stream to a list of bytes
+        final responseData = await streamedResponse.stream.toBytes();
+        final result = utf8.decode(responseData);
+        final data = json.decode(result);
+
+        String birdCategory = data['bird_category'];
+        String status = data['status'];
+
+        // Show identification result in a dialog
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Video Analysis Result'),
-            content: Text('Prediction: $prediction'),
+            title: const Text('Species Identified'),
+            content: Text('Bird Category: $birdCategory\nStatus: $status'),
             actions: [
               TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await savePredictionToDatabase(videoPath, prediction);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const VideoScreen(),
-                    ),
-                  );
+                onPressed: () {
+                  // Call the upload function when OK is pressed
+                  uploadImageToS3(imageUrl, birdCategory,
+                      status); // Pass the status as well
+                  Navigator.of(context).pop(); // Close the dialog
                 },
                 child: const Text('OK'),
               ),
@@ -173,33 +215,54 @@ class _LoraImageViewState extends State<LoraImageView> {
           ),
         );
       } else {
-        print('Failed to analyze video');
+        print('Failed to identify species: ${streamedResponse.reasonPhrase}');
       }
     } catch (e) {
-      print('Error analyzing video: $e');
+      print('Error identifying species: $e');
     }
   }
 
-  Future<void> savePredictionToDatabase(
-      String videoPath, String prediction) async {
+  Future<void> uploadImageToS3(
+      String imageUrl, String birdCategory, String status) async {
     try {
+      // Download the image from the URL
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode != 200) {
+        print('Failed to download image for upload: ${response.reasonPhrase}');
+        return;
+      }
+
+      // Create a multipart request
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://52.220.37.106:8090/api/videos/upload-video'),
+        Uri.parse('http://52.220.106.102:8090/api/videos/upload/image'),
       );
 
-      request.files.add(await http.MultipartFile.fromPath('video', videoPath));
-      request.fields['description'] = prediction;
+      // Add the image file to the request with the bird category as the filename
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image', // This is the key your API expects
+          response.bodyBytes,
+          filename:
+              '${birdCategory.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}.jpg', // Use birdCategory as filename, sanitize it
+        ),
+      );
 
-      var response = await request.send();
+      // Set the description field as the status
+      request.fields['description'] = status;
 
-      if (response.statusCode == 200) {
-        print('Prediction and video saved to database');
+      // Send the request
+      var streamedResponse = await request.send();
+
+      // Handle the response
+      if (streamedResponse.statusCode == 200) {
+        print(
+            'Image uploaded successfully with filename: ${birdCategory.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}.jpg');
       } else {
-        print('Failed to save prediction and video');
+        print('Failed to upload image: ${streamedResponse.reasonPhrase}');
       }
     } catch (e) {
-      print('Error saving prediction and video: $e');
+      print('Error uploading image: $e');
     }
   }
 
@@ -220,61 +283,61 @@ class _LoraImageViewState extends State<LoraImageView> {
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : Column(
+            : TabBarView(
                 children: [
-                  if (_currentlyPlayingVideo != null &&
-                      _videoPlayerController != null)
-                    Stack(
-                      children: [
-                        Expanded(
-                          child: VlcPlayer(
-                            controller: _videoPlayerController!,
-                            aspectRatio: 16 / 9,
-                            placeholder: const Center(
-                                child: CircularProgressIndicator()),
-                          ),
-                        ),
-                        Positioned(
-                          top: 8.0,
-                          right: 8.0,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 30.0,
-                            ),
-                            onPressed: closePreview,
-                          ),
-                        ),
-                      ],
-                    ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        buildImageGrid(),
-                        buildVideoGrid(),
-                      ],
-                    ),
-                  ),
+                  buildImageTab(),
+                  buildVideoTab(),
                 ],
               ),
       ),
     );
   }
 
-  Widget buildImageGrid() {
+  Widget buildImageTab() {
     return GridView.builder(
-      padding: const EdgeInsets.all(10.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
+        childAspectRatio: 1.0,
       ),
       itemCount: imageUrls.length,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            // Optionally, handle image tap to show full-screen view
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Image Options'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.cover,
+                      ),
+                      const SizedBox(height: 10),
+                      Text('Would you like to identify the species?'),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Call the identifySpecies function here
+                        identifySpecies(imageUrls[index]);
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: const Text('See Result'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                  ],
+                );
+              },
+            );
           },
           child: Image.network(
             imageUrls[index],
@@ -285,58 +348,47 @@ class _LoraImageViewState extends State<LoraImageView> {
     );
   }
 
-  Widget buildVideoGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(10.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-      ),
+  Widget buildVideoTab() {
+    return ListView.builder(
       itemCount: videoUrls.length,
       itemBuilder: (context, index) {
-        return FutureBuilder<String>(
-          future: getVideoThumbnail(videoUrls[index]),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.hasData) {
-              return GestureDetector(
-                onTap: () async {
-                  // Ensure video player controller is disposed before initializing a new one
-                  _videoPlayerController?.dispose();
-
-                  setState(() {
-                    _currentlyPlayingVideo = videoUrls[index];
-                    _videoPlayerController = VlcPlayerController.file(
-                      File(videoUrls[index]),
-                      autoPlay: true,
-                      options: VlcPlayerOptions(),
-                    );
-                  });
-
-                  // After playing, call analyzeVideo
-                  await analyzeVideo(videoUrls[index]);
-                },
-                child: Stack(
-                  children: [
-                    Image.file(
-                      File(snapshot.data!),
-                      fit: BoxFit.cover,
-                    ),
-                    const Positioned(
-                      bottom: 8.0,
-                      right: 8.0,
-                      child: Icon(
-                        Icons.play_circle_fill,
-                        color: Colors.white,
-                        size: 30.0,
+        return ListTile(
+          title: Text('Video ${index + 1}'),
+          onTap: () {
+            if (_currentlyPlayingVideo == videoUrls[index]) {
+              closePreview();
+            } else {
+              _currentlyPlayingVideo = videoUrls[index];
+              _videoPlayerController = VlcPlayerController.network(
+                videoUrls[index],
+                hwAcc: HwAcc.full,
+                autoPlay: true,
+                options: VlcPlayerOptions(),
+              );
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Video Preview'),
+                    content: Container(
+                      width: double.maxFinite,
+                      height: 200,
+                      child: VlcPlayer(
+                        controller: _videoPlayerController!,
+                        aspectRatio: 16 / 9,
                       ),
                     ),
-                  ],
-                ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          closePreview();
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  );
+                },
               );
-            } else {
-              return const Center(child: CircularProgressIndicator());
             }
           },
         );

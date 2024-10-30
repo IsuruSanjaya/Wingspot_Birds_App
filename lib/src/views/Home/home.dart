@@ -8,7 +8,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen(
       {Key? key,
       required String name,
-      required Uint8List image,
+      // required Uint8List image,
       required String mobile,
       required email})
       : super(key: key);
@@ -54,32 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: _buildSquareButtonWithImageIcon(
-                  'Bird Species Analysis',
-                  'assets/images/dove.png',
-                  const Color.fromARGB(255, 18, 71, 33), // Light opacity
-                  () {
-                    Navigator.pushNamed(context, '/birda');
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildSquareButtonWithImageIcon(
-                  'Egg Behavior Analysis',
-                  'assets/images/egg.png',
-                  const Color.fromARGB(255, 18, 71, 33), // Light opacity
-                  () {
-                    // Navigator.pushNamed(context, '/eggAnalysis');
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSquareButtonWithImageIcon(
                   'Lora Live Logs',
                   'assets/images/live-streaming.png',
                   const Color.fromARGB(255, 18, 71, 33), // Light opacity
@@ -96,6 +70,59 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Color.fromARGB(255, 18, 71, 33), // Light opacity
                   () {
                     Navigator.pushNamed(context, '/lorahistory');
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSquareButtonWithImageIcon(
+                  'Bird Species Analysis',
+                  'assets/images/dove.png',
+                  const Color.fromARGB(255, 18, 71, 33), // Light opacity
+                  () {
+                    Navigator.pushNamed(context, '/birdanalysis');
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildSquareButtonWithImageIcon(
+                  'Egg Behavior Analysis',
+                  'assets/images/egg.png',
+                  const Color.fromARGB(255, 18, 71, 33), // Light opacity
+                  () {
+                    Navigator.pushNamed(context, '/egg');
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const SizedBox(width: 0),
+              Expanded(
+                child: _buildSquareButtonWithImageIcon(
+                  'Success Rate',
+                  'assets/images/refresh.png',
+                  const Color.fromARGB(255, 18, 71, 33), // Light opacity
+                  () {
+                    Navigator.pushNamed(context, '/success');
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildSquareButtonWithImageIcon(
+                  'Species Identification',
+                  'assets/images/refresh.png',
+                  const Color.fromARGB(255, 18, 71, 33), // Light opacity
+                  () {
+                    Navigator.pushNamed(context, '/birdspecies');
                   },
                 ),
               ),

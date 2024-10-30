@@ -59,6 +59,9 @@ dependencies:
   table_calendar: ^3.0.8
   image: ^4.0.15  # Add this line with the latest version
   dio: ^5.7.0
+  permission_handler: ^11.0.1
+  image_gallery_saver: ^2.0.3
+
 
 
 

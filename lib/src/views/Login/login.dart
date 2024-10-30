@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(
               builder: (context) => HomeScreen(
                   name: name,
-                  image: decodedImage,
+                  // image: decodedImage,
                   email: email,
                   mobile: mobile),
             ),
